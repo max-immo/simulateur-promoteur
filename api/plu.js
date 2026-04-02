@@ -67,7 +67,8 @@ async function getPrixDVF(insee) {
       source: maisons.length + apparts.length > 0 ? 'DVF réel' : 'Estimation fallback'
     };
   } catch (e) {
-    return { ...getPrixFallback(insee), nb_maisons: 0, nb_apparts: 0, source: 'Estimation fallback' };
+    const fb = getPrixFallback(insee);
+    return { ...fb, nb_maisons: 0, nb_apparts: 0, source: 'Estimation fallback' };
   }
 }
 
@@ -90,20 +91,22 @@ export default async function handler(req, res) {
     const label = geoData.features[0].properties.label;
     const geom = encodeURIComponent(JSON.stringify({ type: 'Point', coordinates: [lon, lat] }));
 
-    const [pluRes, supRes, dvf] = await Promise.all([
-      fetch(`https://apicarto.ign.fr/api/gpu/zone-urba?geom=${geom}`).then(r => r.json()).catch(() => null),
-      fetch(`https://apicarto.ign.fr/api/gpu/info-surf?geom=${geom}`).then(r => r.json()).catch(() => null),
-      getPrixDVF(insee)
-    ]);
+    const pluData = await fetch(`https://apicarto.ign.fr/api/gpu/zone-urba?geom=${geom}`)
+      .then(r => r.json()).catch(() => null);
 
-    const zone = pluRes?.features?.[0]?.properties || null;
-    const sups = interpretSUP(supRes?.features);
+    const supData = await fetch(`https://apicarto.ign.fr/api/gpu/info-surf?geom=${geom}`)
+      .then(r => r.json()).catch(() => null);
+
+    const dvf = await getPrixDVF(insee);
+
+    const zone = pluData?.features?.[0]?.properties || null;
+    const sups = interpretSUP(supData?.features);
     const lls = checkLLS(insee, zone?.libelle);
 
     const flagsAdmin = [];
     if (sups.some(s => s.impact.startsWith('FORT'))) flagsAdmin.push('ALERTE SUP GAZ - Emprise constructible réduite');
     if (lls.obligatoire) flagsAdmin.push(`QUOTA LLS ${Math.round(lls.taux * 100)}% - Impact CA promoteur`);
-    if (zone?.libelle?.toUpperCase().startsWith('A') || zone?.libelle?.toUpperCase().startsWith('N')) flagsAdmin.push('ZONE NON CONSTRUCTIBLE - Rejeter le lead');
+    if (zone?.libelle?.toUpperCase().startsWith('N') || zone?.libelle?.toUpperCase() === 'A') flagsAdmin.push('ZONE NON CONSTRUCTIBLE - Rejeter le lead');
     if (zone?.libelle?.toUpperCase().startsWith('AU')) flagsAdmin.push('ZONE AU - Verifier OAP');
 
     const score = flagsAdmin.some(f => f.includes('NON CONSTRUCTIBLE')) ? 'ROUGE'
