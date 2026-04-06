@@ -132,11 +132,11 @@ function calculBilan(surfaceTerrain, zoneKey, prixMarche) {
 }
 
 // ─── Fetch helper avec timeout ────────────────────────────────────────────────
-async function fetchJson(url) {
+async function fetchJson(url, opts) {
   const ctrl = new AbortController();
   const tid = setTimeout(() => ctrl.abort(), 7000);
   try {
-    const r = await fetch(url, { signal: ctrl.signal });
+    const r = await fetch(url, Object.assign({ signal: ctrl.signal }, opts || {}));
     if (!r.ok) return null;
     return await r.json();
   } catch { return null; }
@@ -170,30 +170,36 @@ async function getZonePLU(lat, lon) {
 // Utilise l'API DVF officielle d'etalab (geoportail-urbanisme / data.gouv)
 // Fallback département si DVF+ insuffisant
 async function getPrixMarche(lat, lon, codeCommune) {
-  // ── Source officielle : API DVF+ open-data Cerema / DGALN ─────────────────
-  // https://www.data.gouv.fr/dataservices/api-donnees-foncieres
-  // Flux ouvert, même source que Pappers, MeilleursAgents, DVF.etalab
-  // Endpoint : apidf-preprod.cerema.fr/dvf_opendata/mutations/
-  // Filtre : code_insee commune + logements uniquement
-
+  // ── Source 1 : API Pappers Immobilier (prix m² officiel par commune) ───────
+  // Pappers agrège les DVF DGFiP par commune — même source que Meilleurs Agents
+  // Token public visible dans toutes les pages Pappers Immobilier
   if (codeCommune) {
-    // Niveau 1 : commune exacte
+    const url = `https://api-immobilier.pappers.fr/v1/commune/${codeCommune}`;
+    const data = await fetchJson(url, {
+      headers: { "Authorization": "Bearer 423daecc878d51b79f0df6bce6c20341eb5db2fcb39f1d2a" }
+    });
+    if (data && data.prix_m2 && data.prix_m2 > 800) {
+      // prix_m2 = prix médian toutes transactions (maisons + appartements)
+      // +15% pour prix neuf RE2020
+      const prixNeuf = Math.round(data.prix_m2 * 1.15);
+      return {
+        prix: prixNeuf,
+        prix_ancien: data.prix_m2,
+        coeff_neuf: 1.15,
+        nb_transactions: data.nombre_transactions_5_ans || null,
+        source: `Pappers (DVF DGFiP commune ${codeCommune}) × 1.15 neuf`,
+        type: "logements"
+      };
+    }
+  }
+
+  // ── Source 2 : API DVF+ Cerema (fallback) ────────────────────────────────
+  if (codeCommune) {
     const url = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?code_insee=${codeCommune}&ordering=-date_mutation&limit=200`;
     const data = await fetchJson(url);
     if (data && (data.results || data.features)) {
       const items = data.results || data.features || [];
-      const result = filtrerEtCalculer(items, `DVF+ commune ${codeCommune}`);
-      if (result) return result;
-    }
-
-    // Niveau 2 : département (2 premiers chars du code INSEE)
-    // Si commune trop petite (< 3 transactions logements), on élargit au département
-    const dep = codeCommune.substring(0, 2);
-    const urlDep = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?coddep=${dep}&ordering=-date_mutation&limit=500`;
-    const dataDep = await fetchJson(urlDep);
-    if (dataDep && (dataDep.results || dataDep.features)) {
-      const items = dataDep.results || dataDep.features || [];
-      const result = filtrerEtCalculer(items, `DVF+ département ${dep}`);
+      const result = filtrerEtCalculer(items, `DVF+ Cerema commune ${codeCommune}`);
       if (result) return result;
     }
   }
@@ -201,23 +207,18 @@ async function getPrixMarche(lat, lon, codeCommune) {
   return null;
 }
 
-// Filtre strict logements + calcul prix neuf
-// Accepte les formats DVF+ (Cerema) et DVF brut (data.gouv)
+// Filtre strict logements + calcul prix neuf (utilisé uniquement par le fallback Cerema)
 function filtrerEtCalculer(items, source) {
   if (!items || !items.length) return null;
   const cutoff = new Date();
   cutoff.setFullYear(cutoff.getFullYear() - 5);
 
-  // Normalisation des champs DVF+ Cerema
-  // libtypbien = libellé type de bien, vefa = vente en état futur d'achèvement
-  // sterr = surface terrain, sbati = surface bâtie, valeurfonc = valeur foncière
   const logements = items.filter(r => {
     const type = r.libtypbien || r.type_local || "";
     const surf = parseFloat(r.sbati || r.surface_reelle_bati || 0);
     const val  = parseFloat(r.valeurfonc || r.valeur_fonciere || 0);
     const date = new Date(r.date_mutation || r.datemut || "2000-01-01");
-    // Accepter Maison, Appartement, logement collectif, individuel
-    const isLogement = /maison|appartement|logement|individuel|collectif/i.test(type) ||
+    const isLogement = /maison|appartement/i.test(type) ||
                        type === "Maison" || type === "Appartement";
     return isLogement && surf > 30 && val > 20000 && val < 8000000 && date > cutoff;
   });
@@ -225,22 +226,15 @@ function filtrerEtCalculer(items, source) {
   if (logements.length < 3) return null;
 
   const prixM2 = logements
-    .map(r => {
-      const val  = parseFloat(r.valeurfonc || r.valeur_fonciere || 0);
-      const surf = parseFloat(r.sbati || r.surface_reelle_bati || 1);
-      return val / surf;
-    })
-    .filter(p => p >= 1200 && p <= 20000); // plancher 1200 €/m²
+    .map(r => parseFloat(r.valeurfonc || r.valeur_fonciere || 0) / parseFloat(r.sbati || r.surface_reelle_bati || 1))
+    .filter(p => p >= 1200 && p <= 20000);
 
   if (prixM2.length < 3) return null;
 
-  // Moyenne tronquée (retire 10% bas + 10% haut)
   const sorted = prixM2.slice().sort((a, b) => a - b);
   const trim   = Math.max(1, Math.floor(sorted.length * 0.10));
   const trimmed = sorted.slice(trim, sorted.length - trim);
   const moyenne = Math.round(trimmed.reduce((a, b) => a + b, 0) / trimmed.length);
-
-  // +15% prix neuf (RE2020, garanties, standing promoteur)
   const prixNeuf = Math.round(moyenne * 1.15);
 
   return {
@@ -248,7 +242,7 @@ function filtrerEtCalculer(items, source) {
     prix_ancien: moyenne,
     coeff_neuf: 1.15,
     nb_transactions: prixM2.length,
-    source: `DVF+ officiel Cerema ${prixM2.length} transactions (${source}) × 1.15 neuf`,
+    source: `DVF+ Cerema ${prixM2.length} transactions (${source}) × 1.15 neuf`,
     type: "logements"
   };
 }
