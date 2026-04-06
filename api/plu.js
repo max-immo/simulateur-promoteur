@@ -168,64 +168,89 @@ async function getZonePLU(lat, lon) {
 
 // ─── API DVF etalab ───────────────────────────────────────────────────────────
 // Utilise l'API DVF officielle d'etalab (geoportail-urbanisme / data.gouv)
-// Fallback sur cquest si pas de résultat
-async function getPrixMarche(lat, lon) {
-  // DVF cquest — rayon progressif 1km → 3km → 8km
-  for (const dist of [1000, 3000, 8000]) {
-    const url = `https://api.cquest.org/dvf?lat=${lat}&lon=${lon}&dist=${dist}&nature_mutation=Vente`;
+// Fallback département si DVF+ insuffisant
+async function getPrixMarche(lat, lon, codeCommune) {
+  // ── Source officielle : API DVF+ open-data Cerema / DGALN ─────────────────
+  // https://www.data.gouv.fr/dataservices/api-donnees-foncieres
+  // Flux ouvert, même source que Pappers, MeilleursAgents, DVF.etalab
+  // Endpoint : apidf-preprod.cerema.fr/dvf_opendata/mutations/
+  // Filtre : code_insee commune + logements uniquement
+
+  if (codeCommune) {
+    // Niveau 1 : commune exacte
+    const url = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?code_insee=${codeCommune}&ordering=-date_mutation&limit=200`;
     const data = await fetchJson(url);
-    if (!data || !data.resultats || !data.resultats.length) continue;
+    if (data && (data.results || data.features)) {
+      const items = data.results || data.features || [];
+      const result = filtrerEtCalculer(items, `DVF+ commune ${codeCommune}`);
+      if (result) return result;
+    }
 
-    const cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - 5); // 5 ans pour plus de données
-
-    // FILTRAGE STRICT : uniquement logements habités, surface >30m²
-    // Exclut terrains, garages, locaux commerciaux qui tirent la moyenne vers le bas
-    const logements = data.resultats.filter(r =>
-      (r.type_local === "Appartement" || r.type_local === "Maison") &&
-      r.surface_reelle_bati > 30 &&         // exclut garages/dépendances
-      r.valeur_fonciere > 0 &&
-      r.valeur_fonciere < 5000000 &&        // exclut ventes groupées aberrantes
-      new Date(r.date_mutation) > cutoff
-    );
-
-    if (logements.length < 3) continue; // pas assez de données → rayon suivant
-
-    const prixM2 = logements
-      .map(r => r.valeur_fonciere / r.surface_reelle_bati)
-      .filter(p => p > 800 && p < 25000);  // plancher 800 €/m² — en dessous c'est du terrain/aberration
-
-    if (prixM2.length < 3) continue;
-
-    // Moyenne tronquée : on retire le 10% bas et 10% haut pour robustesse
-    const sorted = prixM2.slice().sort((a, b) => a - b);
-    const trim = Math.floor(sorted.length * 0.10);
-    const trimmed = sorted.slice(trim, sorted.length - trim);
-    const moyenne = Math.round(trimmed.reduce((a, b) => a + b, 0) / trimmed.length);
-
-    // Plancher de cohérence : si moyenne < 1500 sur zone urbaine → suspect
-    // On prend le max entre la moyenne DVF et le plancher raisonnable
-    const prixAncien = Math.max(moyenne, 1200);
-
-    // +15% prix neuf (RE2020, garanties, standing)
-    const prixNeuf = Math.round(prixAncien * 1.15);
-
-    const typeLabel = logements.filter(r => r.type_local === "Appartement").length >= logements.length * 0.5
-      ? "appartements" : "maisons/mixte";
-
-    return {
-      prix: prixNeuf,
-      prix_ancien: prixAncien,
-      coeff_neuf: 1.15,
-      nb_transactions: prixM2.length,
-      rayon_m: dist,
-      source: `DVF ${prixM2.length} ${typeLabel} (rayon ${dist}m) × 1.15 neuf`,
-      type: typeLabel
-    };
+    // Niveau 2 : département (2 premiers chars du code INSEE)
+    // Si commune trop petite (< 3 transactions logements), on élargit au département
+    const dep = codeCommune.substring(0, 2);
+    const urlDep = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?coddep=${dep}&ordering=-date_mutation&limit=500`;
+    const dataDep = await fetchJson(urlDep);
+    if (dataDep && (dataDep.results || dataDep.features)) {
+      const items = dataDep.results || dataDep.features || [];
+      const result = filtrerEtCalculer(items, `DVF+ département ${dep}`);
+      if (result) return result;
+    }
   }
 
-  // Fallback département si aucune donnée DVF fiable
   return null;
+}
+
+// Filtre strict logements + calcul prix neuf
+// Accepte les formats DVF+ (Cerema) et DVF brut (data.gouv)
+function filtrerEtCalculer(items, source) {
+  if (!items || !items.length) return null;
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 5);
+
+  // Normalisation des champs DVF+ Cerema
+  // libtypbien = libellé type de bien, vefa = vente en état futur d'achèvement
+  // sterr = surface terrain, sbati = surface bâtie, valeurfonc = valeur foncière
+  const logements = items.filter(r => {
+    const type = r.libtypbien || r.type_local || "";
+    const surf = parseFloat(r.sbati || r.surface_reelle_bati || 0);
+    const val  = parseFloat(r.valeurfonc || r.valeur_fonciere || 0);
+    const date = new Date(r.date_mutation || r.datemut || "2000-01-01");
+    // Accepter Maison, Appartement, logement collectif, individuel
+    const isLogement = /maison|appartement|logement|individuel|collectif/i.test(type) ||
+                       type === "Maison" || type === "Appartement";
+    return isLogement && surf > 30 && val > 20000 && val < 8000000 && date > cutoff;
+  });
+
+  if (logements.length < 3) return null;
+
+  const prixM2 = logements
+    .map(r => {
+      const val  = parseFloat(r.valeurfonc || r.valeur_fonciere || 0);
+      const surf = parseFloat(r.sbati || r.surface_reelle_bati || 1);
+      return val / surf;
+    })
+    .filter(p => p >= 1200 && p <= 20000); // plancher 1200 €/m²
+
+  if (prixM2.length < 3) return null;
+
+  // Moyenne tronquée (retire 10% bas + 10% haut)
+  const sorted = prixM2.slice().sort((a, b) => a - b);
+  const trim   = Math.max(1, Math.floor(sorted.length * 0.10));
+  const trimmed = sorted.slice(trim, sorted.length - trim);
+  const moyenne = Math.round(trimmed.reduce((a, b) => a + b, 0) / trimmed.length);
+
+  // +15% prix neuf (RE2020, garanties, standing promoteur)
+  const prixNeuf = Math.round(moyenne * 1.15);
+
+  return {
+    prix: prixNeuf,
+    prix_ancien: moyenne,
+    coeff_neuf: 1.15,
+    nb_transactions: prixM2.length,
+    source: `DVF+ officiel Cerema ${prixM2.length} transactions (${source}) × 1.15 neuf`,
+    type: "logements"
+  };
 }
 
 // ─── Fallback prix par département (médiane DVF 2023-2024) ───────────────────
@@ -305,11 +330,13 @@ module.exports = async function handler(req, res) {
 
   try {
     // ── Appels parallèles ──
-    const [zoneResult, cadastreResult, dvfResult] = await Promise.all([
+    const [zoneResult, cadastreResult] = await Promise.all([
       getZonePLU(latF, lonF),
-      getSurface(latF, lonF),
-      getPrixMarche(latF, lonF)
+      getSurface(latF, lonF)
     ]);
+    // DVF après cadastre pour avoir le code commune
+    const codeCommune = cadastreResult && cadastreResult.code_commune;
+    const dvfResult = await getPrixMarche(latF, lonF, codeCommune);
 
     // ── Surface terrain ──
     let surfaceTerrain = parseFloat(surface) || 0;
