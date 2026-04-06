@@ -197,20 +197,20 @@ async function getPrixMarche(lat, lon) {
 
     const prix = mutations
       .map(r => r.valeur_fonciere / r.surface_reelle_bati)
-      .filter(p => p > 500 && p < 30000)
-      .sort((a, b) => a - b);
+      .filter(p => p > 500 && p < 30000);
 
     if (prix.length >= 2) {
-      // Médiane
-      const mid = Math.floor(prix.length / 2);
-      const mediane = prix.length % 2 === 0
-        ? Math.round((prix[mid - 1] + prix[mid]) / 2)
-        : prix[mid];
+      // Moyenne (plus représentative sur marchés peu liquides)
+      const moyenne = Math.round(prix.reduce((a, b) => a + b, 0) / prix.length);
+      // +15% pour prix neuf (RE2020, garanties, standing promoteur)
+      const prixNeuf = Math.round(moyenne * 1.15);
       return {
-        prix: mediane,
+        prix: prixNeuf,
+        prix_ancien: moyenne,
+        coeff_neuf: 1.15,
         nb_transactions: prix.length,
         rayon_m: dist,
-        source: `DVF ${prix.length} transactions (rayon ${dist}m)`,
+        source: `DVF ${prix.length} transactions (rayon ${dist}m) × 1.15 neuf`,
         type: apparts.length >= 3 ? "appartements" : "mixte"
       };
     }
@@ -359,7 +359,7 @@ module.exports = async function handler(req, res) {
           `5. Hauteur acrotère PLU : ${zoneInfo.hauteur} m → ${Math.floor(zoneInfo.hauteur / 2.80)} niveaux (h/2.80m)`,
           `6. SHAB brute = ${Math.round(surfaceTerrain * zoneInfo.ces)} × ${Math.floor(zoneInfo.hauteur / 2.80)} = ${bilan.calcul ? bilan.calcul.shab_brute : 0} m²`,
           `7. SHAB nette (×0.85, déduction parties communes) = ${bilan.calcul ? bilan.calcul.shab_nette : 0} m²`,
-          `8. Prix marché : ${prixMarche} €/m² — ${dvfDetail.source}`,
+          `8. Prix neuf : ${prixMarche} €/m² (moyenne DVF ${dvfDetail.prix_ancien || prixMarche} €/m² × 1.15 neuf) — ${dvfDetail.source}`,
           `9. CA promoteur = ${bilan.calcul ? bilan.calcul.shab_nette : 0} × ${prixMarche} = ${bilan.calcul ? bilan.calcul.ca_promoteur.toLocaleString("fr-FR") : 0} €`,
           `10. Charge foncière (22%) = ${bilan.calcul ? bilan.calcul.charge_fonciere.toLocaleString("fr-FR") : 0} €`,
           `11. Low = CF × 0.85 = ${bilan.valeur_terrain ? bilan.valeur_terrain.low.toLocaleString("fr-FR") : 0} €`,
