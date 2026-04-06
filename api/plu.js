@@ -170,54 +170,62 @@ async function getZonePLU(lat, lon) {
 // Utilise l'API DVF officielle d'etalab (geoportail-urbanisme / data.gouv)
 // Fallback sur cquest si pas de résultat
 async function getPrixMarche(lat, lon) {
-  // 1. Essai DVF cquest (historiquement fiable, rayon progressif)
-  for (const dist of [800, 2000, 5000]) {
+  // DVF cquest — rayon progressif 1km → 3km → 8km
+  for (const dist of [1000, 3000, 8000]) {
     const url = `https://api.cquest.org/dvf?lat=${lat}&lon=${lon}&dist=${dist}&nature_mutation=Vente`;
     const data = await fetchJson(url);
     if (!data || !data.resultats || !data.resultats.length) continue;
 
     const cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - 4);
+    cutoff.setFullYear(cutoff.getFullYear() - 5); // 5 ans pour plus de données
 
-    // Appartements d'abord
-    const apparts = data.resultats.filter(r =>
-      r.type_local === "Appartement" &&
-      r.surface_reelle_bati > 15 &&
-      r.valeur_fonciere > 0 &&
-      new Date(r.date_mutation) > cutoff
-    );
-
-    // Si pas assez d'apparts, prendre maisons aussi
-    const mutations = apparts.length >= 3 ? apparts : data.resultats.filter(r =>
+    // FILTRAGE STRICT : uniquement logements habités, surface >30m²
+    // Exclut terrains, garages, locaux commerciaux qui tirent la moyenne vers le bas
+    const logements = data.resultats.filter(r =>
       (r.type_local === "Appartement" || r.type_local === "Maison") &&
-      r.surface_reelle_bati > 20 &&
+      r.surface_reelle_bati > 30 &&         // exclut garages/dépendances
       r.valeur_fonciere > 0 &&
+      r.valeur_fonciere < 5000000 &&        // exclut ventes groupées aberrantes
       new Date(r.date_mutation) > cutoff
     );
 
-    const prix = mutations
-      .map(r => r.valeur_fonciere / r.surface_reelle_bati)
-      .filter(p => p > 500 && p < 30000);
+    if (logements.length < 3) continue; // pas assez de données → rayon suivant
 
-    if (prix.length >= 2) {
-      // Moyenne (plus représentative sur marchés peu liquides)
-      const moyenne = Math.round(prix.reduce((a, b) => a + b, 0) / prix.length);
-      // +15% pour prix neuf (RE2020, garanties, standing promoteur)
-      const prixNeuf = Math.round(moyenne * 1.15);
-      return {
-        prix: prixNeuf,
-        prix_ancien: moyenne,
-        coeff_neuf: 1.15,
-        nb_transactions: prix.length,
-        rayon_m: dist,
-        source: `DVF ${prix.length} transactions (rayon ${dist}m) × 1.15 neuf`,
-        type: apparts.length >= 3 ? "appartements" : "mixte"
-      };
-    }
+    const prixM2 = logements
+      .map(r => r.valeur_fonciere / r.surface_reelle_bati)
+      .filter(p => p > 800 && p < 25000);  // plancher 800 €/m² — en dessous c'est du terrain/aberration
+
+    if (prixM2.length < 3) continue;
+
+    // Moyenne tronquée : on retire le 10% bas et 10% haut pour robustesse
+    const sorted = prixM2.slice().sort((a, b) => a - b);
+    const trim = Math.floor(sorted.length * 0.10);
+    const trimmed = sorted.slice(trim, sorted.length - trim);
+    const moyenne = Math.round(trimmed.reduce((a, b) => a + b, 0) / trimmed.length);
+
+    // Plancher de cohérence : si moyenne < 1500 sur zone urbaine → suspect
+    // On prend le max entre la moyenne DVF et le plancher raisonnable
+    const prixAncien = Math.max(moyenne, 1200);
+
+    // +15% prix neuf (RE2020, garanties, standing)
+    const prixNeuf = Math.round(prixAncien * 1.15);
+
+    const typeLabel = logements.filter(r => r.type_local === "Appartement").length >= logements.length * 0.5
+      ? "appartements" : "maisons/mixte";
+
+    return {
+      prix: prixNeuf,
+      prix_ancien: prixAncien,
+      coeff_neuf: 1.15,
+      nb_transactions: prixM2.length,
+      rayon_m: dist,
+      source: `DVF ${prixM2.length} ${typeLabel} (rayon ${dist}m) × 1.15 neuf`,
+      type: typeLabel
+    };
   }
 
-  // 2. Fallback par département (valeurs réelles 2024)
-  return null; // géré dans le handler
+  // Fallback département si aucune donnée DVF fiable
+  return null;
 }
 
 // ─── Fallback prix par département (médiane DVF 2023-2024) ───────────────────
@@ -227,7 +235,7 @@ const PRIX_DEPT = {
   "06":4200,"13":2900,"69":3600,"31":2900,"33":3400, // grandes métropoles
   "34":2800,"38":2800,"44":3100,"59":2400,"67":3000, // autres métropoles
   "76":2400,"57":2100,"63":2000,"35":3000,"29":2300, // villes moyennes
-  "04":1800,"05":2100,"48":1400,"15":1200,"23":1000, // rural/montagne
+  "04":2300,"05":2200,"48":1600,"15":1400,"23":1100, // rural/montagne (DVF 2024)
   "83":3400,"84":2700,"30":2300,"66":2200,"11":1900, // Sud-Méditerranée
   "971":2600,"972":2600,"973":1900,"974":2300,        // DOM
 };
