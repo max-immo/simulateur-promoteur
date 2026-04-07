@@ -71,13 +71,20 @@ function resolveZone(code) {
   return "_fallback";
 }
 
-// ─── Calcul bilan promoteur ───────────────────────────────────────────────────
-// 1. CES × surface_terrain = surface_au_sol
-// 2. surface_au_sol × (hauteur_acrotere / 2.80) = SHAB brute
-// 3. SHAB_brute × 0.85 = SHAB nette vendable
-// 4. SHAB_nette × prix_marche = CA promoteur
-// 5. CA × 0.22 = Charge foncière
-// 6. low = CF × 0.85 / high = low × 1.35
+// ─── Calcul bilan promoteur — logique réelle ──────────────────────────────────
+// Standard professionnel (PACA/IDF) :
+// 1. Surface au sol = terrain × CES
+// 2. SHAB brute = surface_sol × (hauteur / 2.80m)
+// 3. SHAB nette = brute × 0.85 (parties communes)
+// 4. CA TTC = SHAB nette × prix marché neuf
+// 5. CA HT = CA TTC / 1.20 (TVA 20%)
+// 6. Coût construction = SHAB nette × 1650 €/m² (travaux + VRD)
+// 7. Frais architecte/BET = coût travaux × 8%
+// 8. Commercialisation = CA TTC × 5%
+// 9. Frais financiers = CA TTC × 4%
+// 10. Marge promoteur min = CA TTC × 20%
+// 11. CF = CA HT - construction - archi - commerçialisation - financiers - marge
+// 12. Fourchette: low = CF × 0.85, high = low × 1.35
 function calculBilan(surfaceTerrain, zoneKey, prixMarche) {
   const zone = ZONES_PLU[zoneKey] || ZONES_PLU["_fallback"];
 
@@ -90,16 +97,39 @@ function calculBilan(surfaceTerrain, zoneKey, prixMarche) {
     };
   }
 
-  const H_ETAGE = 2.80; // hauteur libre standard par niveau
+  const H_ETAGE = 2.80;
+  const COUT_CONSTRUCTION_M2 = 1650; // €/m² SHAB (travaux + VRD, standard PACA/IDF)
+  const COEFF_ARCHI_BET     = 0.08;  // 8% du coût travaux
+  const COEFF_COMMERC       = 0.05;  // 5% CA TTC
+  const COEFF_FINANCIER      = 0.04;  // 4% CA TTC
+  const COEFF_MARGE          = 0.20;  // 20% CA TTC marge min promoteur
+  const TVA                  = 1.20;
 
-  const surface_au_sol  = Math.round(surfaceTerrain * zone.ces);
-  const nb_niveaux      = Math.floor(zone.hauteur / H_ETAGE);
-  const shab_brute      = Math.round(surface_au_sol * nb_niveaux);
-  const shab_nette      = Math.round(shab_brute * 0.85);
-  const ca              = Math.round(shab_nette * prixMarche);
-  const cf              = Math.round(ca * 0.22);
-  const val_low         = Math.round(cf * 0.85 / 1000) * 1000;
-  const val_high        = Math.round(val_low * 1.35 / 1000) * 1000;
+  const surface_au_sol = Math.round(surfaceTerrain * zone.ces);
+  const nb_niveaux     = Math.floor(zone.hauteur / H_ETAGE);
+  const shab_brute     = Math.round(surface_au_sol * nb_niveaux);
+  const shab_nette     = Math.round(shab_brute * 0.85);
+
+  // CA
+  const ca_ttc = Math.round(shab_nette * prixMarche);
+  const ca_ht  = Math.round(ca_ttc / TVA);
+
+  // Charges promoteur
+  const cout_travaux  = Math.round(shab_nette * COUT_CONSTRUCTION_M2);
+  const cout_archi    = Math.round(cout_travaux * COEFF_ARCHI_BET);
+  const cout_commerc  = Math.round(ca_ttc * COEFF_COMMERC);
+  const cout_financier= Math.round(ca_ttc * COEFF_FINANCIER);
+  const marge_promo   = Math.round(ca_ttc * COEFF_MARGE);
+
+  // Charge foncière résiduelle
+  const cf = Math.max(0, ca_ht - cout_travaux - cout_archi - cout_commerc - cout_financier - marge_promo);
+
+  // Ratio CF/CA TTC (cohérence : doit être entre 8% et 30%)
+  const ratio_cf_ca = ca_ttc > 0 ? Math.round((cf / ca_ttc) * 100) : 0;
+
+  // Fourchette valeur terrain net vendeur
+  const val_low  = Math.round(cf * 0.85 / 1000) * 1000;
+  const val_high = Math.round(val_low * 1.35 / 1000) * 1000;
 
   return {
     constructible: true,
@@ -109,9 +139,7 @@ function calculBilan(surfaceTerrain, zoneKey, prixMarche) {
       ces: zone.ces,
       hauteur_acrotere: zone.hauteur,
       nb_niveaux_calcules: nb_niveaux,
-      h_etage: H_ETAGE,
-      coeff_parties_communes: 0.85,
-      taux_charge_fonciere: 0.22
+      h_etage: H_ETAGE
     },
     calcul: {
       surface_terrain: Math.round(surfaceTerrain),
@@ -119,8 +147,15 @@ function calculBilan(surfaceTerrain, zoneKey, prixMarche) {
       shab_brute,
       shab_nette,
       prix_marche_m2: Math.round(prixMarche),
-      ca_promoteur: ca,
-      charge_fonciere: cf
+      ca_ttc,
+      ca_ht,
+      cout_travaux,
+      cout_archi_bet: cout_archi,
+      cout_commercialisation: cout_commerc,
+      cout_financier,
+      marge_promoteur: marge_promo,
+      charge_fonciere: cf,
+      ratio_cf_ca_pct: ratio_cf_ca
     },
     valeur_terrain: {
       low: val_low,
@@ -393,11 +428,16 @@ module.exports = async function handler(req, res) {
           `5. Hauteur acrotère PLU : ${zoneInfo.hauteur} m → ${Math.floor(zoneInfo.hauteur / 2.80)} niveaux (h/2.80m)`,
           `6. SHAB brute = ${Math.round(surfaceTerrain * zoneInfo.ces)} × ${Math.floor(zoneInfo.hauteur / 2.80)} = ${bilan.calcul ? bilan.calcul.shab_brute : 0} m²`,
           `7. SHAB nette (×0.85, déduction parties communes) = ${bilan.calcul ? bilan.calcul.shab_nette : 0} m²`,
-          `8. Prix neuf : ${prixMarche} €/m² (moyenne DVF ${dvfDetail.prix_ancien || prixMarche} €/m² × 1.15 neuf) — ${dvfDetail.source}`,
-          `9. CA promoteur = ${bilan.calcul ? bilan.calcul.shab_nette : 0} × ${prixMarche} = ${bilan.calcul ? bilan.calcul.ca_promoteur.toLocaleString("fr-FR") : 0} €`,
-          `10. Charge foncière (22%) = ${bilan.calcul ? bilan.calcul.charge_fonciere.toLocaleString("fr-FR") : 0} €`,
-          `11. Low = CF × 0.85 = ${bilan.valeur_terrain ? bilan.valeur_terrain.low.toLocaleString("fr-FR") : 0} €`,
-          `12. High = low × 1.35 = ${bilan.valeur_terrain ? bilan.valeur_terrain.high.toLocaleString("fr-FR") : 0} €`
+          `8. Prix neuf : ${prixMarche} €/m² (${dvfDetail ? dvfDetail.source : "fallback"})`,
+          `9. CA TTC = ${bilan.calcul ? bilan.calcul.shab_nette : 0} m² × ${prixMarche} €/m² = ${bilan.calcul ? bilan.calcul.ca_ttc.toLocaleString("fr-FR") : 0} €`,
+          `10. CA HT (÷1.20 TVA) = ${bilan.calcul ? bilan.calcul.ca_ht.toLocaleString("fr-FR") : 0} €`,
+          `11. Coût travaux (1650 €/m²) = ${bilan.calcul ? bilan.calcul.cout_travaux.toLocaleString("fr-FR") : 0} €`,
+          `12. Archi/BET (8% travaux) = ${bilan.calcul ? bilan.calcul.cout_archi_bet.toLocaleString("fr-FR") : 0} €`,
+          `13. Commercialisation (5% CA TTC) = ${bilan.calcul ? bilan.calcul.cout_commercialisation.toLocaleString("fr-FR") : 0} €`,
+          `14. Frais financiers (4% CA TTC) = ${bilan.calcul ? bilan.calcul.cout_financier.toLocaleString("fr-FR") : 0} €`,
+          `15. Marge promoteur (20% CA TTC) = ${bilan.calcul ? bilan.calcul.marge_promoteur.toLocaleString("fr-FR") : 0} €`,
+          `16. Charge foncière résiduelle = ${bilan.calcul ? bilan.calcul.charge_fonciere.toLocaleString("fr-FR") : 0} € (ratio CF/CA: ${bilan.calcul ? bilan.calcul.ratio_cf_ca_pct : 0}%)`,
+          `17. Fourchette: ${bilan.valeur_terrain ? bilan.valeur_terrain.low.toLocaleString("fr-FR") : 0} – ${bilan.valeur_terrain ? bilan.valeur_terrain.high.toLocaleString("fr-FR") : 0} €`
         ]
       }
     });
