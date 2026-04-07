@@ -1,0 +1,94 @@
+// api/airtable.js — EstimationTerrain.fr
+// Enregistre chaque simulation + lead dans Airtable
+// Base : applqQPw8cx2pQ8NA
+// Token : patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9
+
+const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN || 'patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9';
+const AIRTABLE_BASE  = process.env.AIRTABLE_BASE  || 'applqQPw8cx2pQ8NA';
+const AIRTABLE_TABLE = process.env.AIRTABLE_TABLE || 'Leads';
+
+module.exports = async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  try {
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const {
+      type,         // 'simulation' ou 'contact'
+      adresse,
+      surface,
+      cadastre,
+      zone_plu,
+      shab_nette,
+      ca_ttc,
+      cout_travaux,
+      marge_promoteur,
+      charge_fonciere,
+      ratio_cf,
+      prix_marche,
+      val_low,
+      val_high,
+      score,
+      prenom,
+      nom,
+      email,
+      tel,
+    } = body;
+
+    const fourchette = val_low && val_high
+      ? `${Math.round(val_low/1000)}K € – ${Math.round(val_high/1000)}K €`
+      : null;
+
+    const fields = {
+      'Date':           new Date().toISOString(),
+      'Type':           type || 'simulation',
+      'Adresse':        adresse || '',
+      'Surface (m²)':   surface ? Number(surface) : null,
+      'Cadastre':       cadastre || '',
+      'Zone PLU':       zone_plu || '',
+      'SHAB nette (m²)':shab_nette ? Number(shab_nette) : null,
+      'CA TTC (€)':     ca_ttc ? Number(ca_ttc) : null,
+      'Coût travaux (€)': cout_travaux ? Number(cout_travaux) : null,
+      'Marge promo (€)':  marge_promoteur ? Number(marge_promoteur) : null,
+      'Charge foncière (€)': charge_fonciere ? Number(charge_fonciere) : null,
+      'Ratio CF/CA (%)': ratio_cf ? Number(ratio_cf) : null,
+      'Prix marché DVF (€/m²)': prix_marche ? Number(prix_marche) : null,
+      'Fourchette':     fourchette || '',
+      'Val low (€)':    val_low ? Number(val_low) : null,
+      'Val high (€)':   val_high ? Number(val_high) : null,
+      'Score':          score ? Number(score) : null,
+      'Prénom':         prenom || '',
+      'Nom':            nom || '',
+      'Email':          email || '',
+      'Téléphone':      tel || '',
+    };
+
+    // Supprimer les champs null pour ne pas planter Airtable
+    Object.keys(fields).forEach(k => {
+      if (fields[k] === null || fields[k] === '') delete fields[k];
+    });
+
+    const r = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(AIRTABLE_TABLE)}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fields }),
+    });
+
+    const data = await r.json();
+    if (!r.ok) {
+      console.error('[airtable] Erreur:', data);
+      return res.status(500).json({ error: 'Airtable error', detail: data });
+    }
+
+    return res.status(200).json({ ok: true, id: data.id });
+  } catch (err) {
+    console.error('[airtable] Exception:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};
