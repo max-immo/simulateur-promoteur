@@ -5,42 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EstimationTerrain.fr — Découvrez le vrai potentiel de votre terrain</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--nuit:#0F172A;--nuit2:#1E293B;--nuit3:#334155;--vert:#10B981;--vert-dark:#059669;--vert-light:#D1FAE5;--blanc:#F8FAFC;--gris:#94A3B8;--gris-light:#E2E8F0;--texte:#0F172A}
+:root{
+  --nuit:#0F172A;--nuit2:#1E293B;--nuit3:#334155;
+  --vert:#10B981;--vert-dark:#059669;--vert-light:#D1FAE5;
+  --blanc:#F8FAFC;--gris:#94A3B8;--gris-light:#E2E8F0;--texte:#0F172A;
+  --or:#F59E0B;
+  --font-body:'Inter',sans-serif;
+  --font-display:'Syne',sans-serif;
+}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:var(--blanc);color:var(--texte);line-height:1.6;font-weight:400}
+body{font-family:var(--font-body);background:var(--blanc);color:var(--texte);line-height:1.6;font-weight:400}
+
+/* ── NAV ── */
 nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px solid var(--nuit2)}
 .nav-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;gap:1rem}
-.logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#fff;white-space:nowrap}.logo span{color:var(--vert)}
+.logo{font-family:var(--font-display);font-size:1.05rem;font-weight:800;color:#fff;white-space:nowrap;letter-spacing:-.01em}.logo span{color:var(--vert)}
 .nav-links{display:flex;gap:2px;flex:1;justify-content:center}
-.nav-link{padding:8px 12px;font-size:13px;color:var(--gris);cursor:pointer;border-radius:6px;transition:all .2s;border:none;background:none;font-family:'Inter',sans-serif;white-space:nowrap}
+.nav-link{padding:8px 12px;font-size:13px;color:var(--gris);cursor:pointer;border-radius:6px;transition:all .2s;border:none;background:none;font-family:var(--font-body);white-space:nowrap}
 .nav-link:hover,.nav-link.active{color:#fff;background:var(--nuit2)}
-.nav-cta{padding:9px 20px;background:var(--vert);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;white-space:nowrap}
+.nav-cta{padding:9px 20px;background:var(--vert);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .2s;white-space:nowrap}
 .nav-cta:hover{background:var(--vert-dark)}
 .page{display:none}.page.active{display:block}
+
+/* ── HERO ── */
 .hero{background:var(--nuit);min-height:calc(100vh - 64px);display:grid;grid-template-columns:1fr 1fr;align-items:center}
 .hero-left{padding:5rem 3rem 5rem 6rem}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--vert);margin-bottom:2rem;letter-spacing:.04em}
 .hero-badge::before{content:'';width:6px;height:6px;background:var(--vert);border-radius:50%;flex-shrink:0}
-.hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:1.5rem}
-.hero h1 em{color:var(--vert);font-style:normal}
+.hero h1{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.01em;margin-bottom:1.5rem;font-stretch:normal;font-variation-settings:normal}
+.hero h1 em{color:var(--vert);font-style:italic}
 .hero-sub{font-size:1.05rem;color:var(--gris);max-width:440px;margin-bottom:1.5rem;line-height:1.75}
 .hero-independant{display:flex;align-items:flex-start;gap:8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--vert);margin-bottom:2rem;max-width:440px;line-height:1.5}
 .hero-independant::before{content:'✓';font-weight:700;flex-shrink:0}
 .hero-proof{display:flex;align-items:center;gap:2rem;padding-top:1.5rem;border-top:1px solid var(--nuit2)}
 .proof-item{text-align:center}
-.proof-num{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--vert)}
+.proof-num{font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--vert)}
 .proof-label{font-size:11px;color:var(--gris);margin-top:2px}
 .hero-right{background:var(--nuit2);height:100%;display:flex;align-items:center;justify-content:center;padding:2rem}
+
+/* ── SIM BOX ── */
 .sim-box{background:var(--nuit);border:1px solid var(--nuit3);border-radius:16px;padding:1.75rem;width:100%;max-width:440px}
-.sim-box-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:#fff;margin-bottom:.25rem}
+.sim-box-title{font-family:var(--font-display);font-size:.95rem;font-weight:700;color:#fff;margin-bottom:.25rem}
 .sim-box-sub{font-size:12px;color:var(--gris);margin-bottom:1.25rem}
 .sfield{margin-bottom:.875rem;position:relative}
 .sfield label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-bottom:5px}
-.sfield input,.sfield select{width:100%;padding:10px 14px;background:var(--nuit2);border:1px solid var(--nuit3);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#fff;outline:none;transition:border .2s}
+.sfield input,.sfield select{width:100%;padding:10px 14px;background:var(--nuit2);border:1px solid var(--nuit3);border-radius:8px;font-size:14px;font-family:var(--font-body);color:#fff;outline:none;transition:border .2s}
 .sfield input::placeholder{color:#475569}
 .sfield input:focus,.sfield select:focus{border-color:var(--vert)}
 .sfield select option{background:var(--nuit2);color:#fff}
@@ -54,12 +68,14 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .map-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-bottom:5px}
 .map-hint{font-size:11px;color:var(--nuit3);margin-bottom:6px}
 .map-container{height:220px;border-radius:8px;border:1px solid var(--nuit3);overflow:hidden}
-.sim-btn{width:100%;padding:12px;background:var(--vert);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:.5rem;letter-spacing:.02em;transition:background .2s}
+.sim-btn{width:100%;padding:12px;background:var(--vert);color:#fff;border:none;border-radius:8px;font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;margin-top:.5rem;letter-spacing:.02em;transition:background .2s}
 .sim-btn:hover{background:var(--vert-dark)}.sim-btn:disabled{opacity:.5;cursor:not-allowed}
 .sim-trust{text-align:center;font-size:11px;color:var(--gris);margin-top:.625rem}
 .sim-status{font-size:11px;color:var(--gris);margin-top:5px;min-height:14px}
 .loader{display:inline-block;width:12px;height:12px;border:2px solid var(--nuit3);border-top-color:var(--vert);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RÉSULTAT — version vendeur ── */
 .sim-result{display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--nuit3)}
 .res-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-bottom:8px}
 .jauge-bar{height:8px;background:var(--nuit3);border-radius:10px;overflow:hidden;margin-bottom:5px}
@@ -74,29 +90,36 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .res-card.faible .res-card-title{color:#fca5a5}.res-card.moyen .res-card-title{color:#fcd34d}
 .res-card.fort .res-card-title,.res-card.tres-fort .res-card-title{color:var(--vert)}
 .res-card-text{font-size:12px;color:var(--gris);line-height:1.55}
-.fourchette-block{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:.875rem;margin-bottom:.875rem;text-align:center;display:none}
-.fourchette-label{font-size:11px;color:var(--gris);margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase}
-.fourchette-val{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--vert)}
-.fourchette-sub{font-size:11px;color:var(--gris);margin-top:3px}
-.cta-etude{background:var(--vert);color:#fff;border:none;border-radius:8px;padding:11px;width:100%;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:.375rem;transition:background .2s}
+
+/* Fourchette — épurée, chiffres en avant */
+.fourchette-block{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.04));border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:1.1rem .875rem;margin-bottom:.875rem;text-align:center;display:none}
+.fourchette-eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--vert);opacity:.8;margin-bottom:4px}
+.fourchette-val{font-family:var(--font-display);font-size:1.9rem;font-weight:800;color:#fff;line-height:1.1;margin-bottom:6px}
+.fourchette-val em{color:var(--vert);font-style:normal}
+.fourchette-pitch{font-size:12px;color:var(--gris);line-height:1.5;margin-bottom:0}
+.fourchette-urgence{display:inline-block;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--or);margin-top:8px}
+
+.cta-etude{background:var(--vert);color:#fff;border:none;border-radius:8px;padding:11px;width:100%;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:.375rem;transition:background .2s}
 .cta-etude:hover{background:var(--vert-dark)}
+
+/* ── SECTIONS COMMUNES ── */
 .choc{background:var(--nuit);padding:6rem}
 .choc-inner{max-width:1100px;margin:0 auto}
 .eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--vert);margin-bottom:1rem}
-.section-h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:800;margin-bottom:1rem}
-.choc h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:800;color:#fff;margin-bottom:3rem;max-width:600px}
+.section-h2{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:800;margin-bottom:1rem}
+.choc h2{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:800;color:#fff;margin-bottom:3rem;max-width:600px}
 .choc-grid{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr;align-items:center;gap:1rem;margin-bottom:2rem}
 .choc-card{background:var(--nuit2);border:1px solid var(--nuit3);border-radius:16px;padding:2rem;text-align:center}
 .choc-card.blue{border-color:rgba(96,165,250,.35)}.choc-card.green{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.05)}
 .choc-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-bottom:1rem;line-height:1.5}
-.choc-price{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--gris)}
+.choc-price{font-family:var(--font-display);font-size:2.2rem;font-weight:800;color:var(--gris)}
 .choc-card.blue .choc-price{color:#60A5FA}.choc-card.green .choc-price{color:var(--vert)}
 .choc-detail{font-size:12px;color:var(--gris);margin-top:.5rem;line-height:1.5}
-.choc-arrow{font-family:'Syne',sans-serif;font-size:1.5rem;color:var(--nuit3);text-align:center;font-weight:800}
+.choc-arrow{font-family:var(--font-display);font-size:1.5rem;color:var(--nuit3);text-align:center;font-weight:800}
 .choc-note{font-size:12px;color:var(--nuit3);text-align:center;margin-bottom:3rem}
 .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
 .why-card{background:var(--nuit2);border:1px solid var(--nuit3);border-radius:12px;padding:1.75rem}
-.why-num{font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;color:var(--nuit3);line-height:1;margin-bottom:1rem}
+.why-num{font-family:var(--font-display);font-size:2.5rem;font-weight:800;color:var(--nuit3);line-height:1;margin-bottom:1rem}
 .why-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:.5rem}
 .why-text{font-size:13px;color:var(--gris);line-height:1.7}
 .profils-section{background:var(--blanc);padding:5rem 6rem}
@@ -121,7 +144,7 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .temo-photo img{width:100%;height:100%;object-fit:cover;filter:brightness(.85)}
 .temo-eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--vert);margin-bottom:1rem}
 .temo-stars{color:#F59E0B;font-size:18px;letter-spacing:2px;margin-bottom:1rem}
-.temo-quote{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;color:#fff;line-height:1.55;margin-bottom:1.5rem;border-left:3px solid var(--vert);padding-left:1.25rem}
+.temo-quote{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:#fff;line-height:1.55;margin-bottom:1.5rem;border-left:3px solid var(--vert);padding-left:1.25rem;font-style:italic}
 .temo-author{font-size:14px;font-weight:500;color:#fff;margin-bottom:4px}
 .temo-detail{font-size:13px;color:var(--gris)}
 .temo-result{display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:6px;padding:8px 14px;margin-top:1.25rem;font-size:13px;color:var(--vert)}
@@ -143,9 +166,9 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .service-tag.est{background:var(--vert-light);color:#065F46}
 .service-tag.div{background:#EFF6FF;color:#1E40AF}
 .service-tag.ao{background:#FFF7ED;color:#9A3412}
-.service-h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.75rem;color:var(--nuit)}
+.service-h3{font-family:var(--font-display);font-size:1.05rem;font-weight:700;margin-bottom:.75rem;color:var(--nuit)}
 .service-text{font-size:13px;color:#64748B;line-height:1.75}
-.service-cta{display:inline-flex;align-items:center;gap:6px;margin-top:1.25rem;font-size:13px;font-weight:500;color:var(--vert);cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;padding:0}
+.service-cta{display:inline-flex;align-items:center;gap:6px;margin-top:1.25rem;font-size:13px;font-weight:500;color:var(--vert);cursor:pointer;background:none;border:none;font-family:var(--font-body);padding:0}
 .service-cta::after{content:'→'}
 .faq{background:var(--blanc);padding:6rem}
 .faq-inner{max-width:720px;margin:0 auto}
@@ -161,7 +184,7 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .about-img{border-radius:16px;overflow:hidden;aspect-ratio:4/3}
 .about-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.82)}
 .about-eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--vert);margin-bottom:1rem}
-.about h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;margin-bottom:1.5rem}
+.about h2{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;margin-bottom:1.5rem}
 .about-text{font-size:15px;color:var(--gris);line-height:1.85;margin-bottom:1.25rem}
 .about-independant{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:1.25rem;margin:1.5rem 0;font-size:14px;color:var(--vert);line-height:1.7}
 .about-independant strong{display:block;font-weight:600;margin-bottom:4px;font-size:15px}
@@ -171,45 +194,79 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .value-text{font-size:12px;color:var(--gris);line-height:1.6}
 .mentions{background:var(--blanc);padding:5rem 6rem}
 .mentions-inner{max-width:780px;margin:0 auto}
-.mentions h2{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:2rem;color:var(--nuit)}
+.mentions h2{font-family:var(--font-display);font-size:1.8rem;font-weight:800;margin-bottom:2rem;color:var(--nuit)}
 .mentions h3{font-size:15px;font-weight:600;color:var(--nuit);margin:2rem 0 .75rem;padding-top:.5rem;border-top:1px solid var(--gris-light)}
 .mentions p{font-size:14px;color:#475569;line-height:1.85;margin-bottom:1rem}
 .cta-final{background:var(--nuit);padding:5rem;text-align:center;border-top:1px solid var(--nuit2)}
-.cta-final h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;color:#fff;margin-bottom:1rem;max-width:560px;margin-left:auto;margin-right:auto}
+.cta-final h2{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;color:#fff;margin-bottom:1rem;max-width:560px;margin-left:auto;margin-right:auto}
 .cta-final p{font-size:1rem;color:var(--gris);max-width:480px;margin:0 auto 2.5rem;line-height:1.8}
 .cta-guarantee{font-size:12px;color:var(--nuit3);margin-top:1.25rem;letter-spacing:.06em}
+
+/* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:500;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
 .modal{background:var(--nuit);border:1px solid var(--nuit3);border-radius:16px;padding:2.5rem;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto}
 .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--gris);font-size:1.5rem;cursor:pointer;line-height:1;padding:4px}
 .modal-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--vert);margin-bottom:1rem}
-.modal h3{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:.5rem}
+.modal h3{font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:.5rem}
 .modal-sub{font-size:13px;color:var(--gris);margin-bottom:1.5rem;line-height:1.7}
 .mfield{margin-bottom:1rem}
 .mfield label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);margin-bottom:6px}
-.mfield input{width:100%;padding:11px 14px;background:var(--nuit2);border:1px solid var(--nuit3);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#fff;outline:none;transition:border .2s}
-.mfield input::placeholder{color:#475569}
-.mfield input:focus{border-color:var(--vert)}
+.mfield input,.mfield select,.mfield textarea{width:100%;padding:11px 14px;background:var(--nuit2);border:1px solid var(--nuit3);border-radius:8px;font-size:14px;font-family:var(--font-body);color:#fff;outline:none;transition:border .2s}
+.mfield textarea{resize:vertical;min-height:80px}
+.mfield input::placeholder,.mfield textarea::placeholder{color:#475569}
+.mfield input:focus,.mfield select:focus,.mfield textarea:focus{border-color:var(--vert)}
+.mfield select option{background:var(--nuit2);color:#fff}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.modal-submit{width:100%;padding:13px;background:var(--vert);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:.5rem;transition:background .2s}
+.modal-submit{width:100%;padding:13px;background:var(--vert);color:#fff;border:none;border-radius:8px;font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;margin-top:.5rem;transition:background .2s}
 .modal-submit:hover{background:var(--vert-dark)}.modal-submit:disabled{opacity:.5;cursor:not-allowed}
 .modal-ok{display:none;text-align:center;padding:1.5rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;margin-top:1rem}
-.modal-ok-title{font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--vert);margin-bottom:.5rem}
+.modal-ok-title{font-family:var(--font-display);font-size:1.1rem;color:var(--vert);margin-bottom:.5rem}
 .modal-ok-text{font-size:13px;color:var(--gris);line-height:1.7}
 .modal-err{display:none;padding:.75rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:13px;color:#fca5a5;margin-top:.5rem}
+
+/* ── PAGE OPÉRATEURS FONCIERS ── */
+.ops-hero{background:var(--nuit);padding:6rem 4rem 4rem;text-align:center}
+.ops-hero-inner{max-width:720px;margin:0 auto}
+.ops-hero h1{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.25rem}
+.ops-hero h1 em{color:var(--vert);font-style:italic}
+.ops-hero p{font-size:1.05rem;color:var(--gris);line-height:1.8;margin-bottom:2rem;max-width:560px;margin-left:auto;margin-right:auto}
+.ops-stats{display:flex;justify-content:center;gap:3rem;padding:2rem 0;border-top:1px solid var(--nuit2);border-bottom:1px solid var(--nuit2);margin:2rem 0}
+.ops-stat-num{font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--vert);display:block}
+.ops-stat-label{font-size:12px;color:var(--gris);margin-top:4px}
+.ops-avantages{background:var(--blanc);padding:4rem}
+.ops-avantages-inner{max-width:1000px;margin:0 auto}
+.ops-avantages h2{font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:var(--nuit);text-align:center;margin-bottom:.75rem}
+.ops-avantages-sub{font-size:15px;color:#64748B;text-align:center;margin-bottom:3rem}
+.ops-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.ops-card{background:#fff;border:1px solid var(--gris-light);border-radius:16px;padding:2rem}
+.ops-card-icon{width:44px;height:44px;background:var(--vert-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1.25rem}
+.ops-card-title{font-size:15px;font-weight:600;color:var(--nuit);margin-bottom:.5rem}
+.ops-card-text{font-size:13px;color:#64748B;line-height:1.7}
+.ops-form-section{background:var(--nuit);padding:4rem}
+.ops-form-inner{max-width:600px;margin:0 auto}
+.ops-form-inner h2{font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:.5rem;text-align:center}
+.ops-form-inner p{font-size:14px;color:var(--gris);text-align:center;margin-bottom:2rem;line-height:1.7}
+.ops-form{background:var(--nuit2);border:1px solid var(--nuit3);border-radius:16px;padding:2rem}
+.ops-reassurance{display:flex;justify-content:center;gap:2rem;margin-top:1.5rem;flex-wrap:wrap}
+.ops-reass-item{font-size:12px;color:var(--nuit3);display:flex;align-items:center;gap:6px}
+.ops-reass-item::before{content:'✓';color:var(--vert);font-weight:700}
+
 .hp{display:none!important;position:absolute;left:-9999px}
 footer{background:var(--nuit);border-top:1px solid var(--nuit2);padding:2.5rem 4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:13px;color:var(--gris)}
 footer a{color:inherit;text-decoration:none;transition:color .2s;cursor:pointer}
 footer a:hover{color:var(--vert)}
-.footer-logo{font-family:'Syne',sans-serif;color:#fff;font-size:1rem;font-weight:800}.footer-logo span{color:var(--vert)}
+.footer-logo{font-family:var(--font-display);color:#fff;font-size:1rem;font-weight:800}.footer-logo span{color:var(--vert)}
+
 @media(max-width:960px){
 .hero{grid-template-columns:1fr;min-height:auto}.hero-left{padding:3rem 1.5rem}.hero-right{padding:1.5rem}
-.choc,.profils-section,.services,.faq,.temo,.about,.mentions,.cta-final{padding:4rem 1.5rem}
+.choc,.profils-section,.services,.faq,.temo,.about,.mentions,.cta-final,.ops-hero,.ops-avantages,.ops-form-section{padding:4rem 1.5rem}
 .choc-grid{grid-template-columns:1fr;gap:1rem}.choc-arrow{display:none}
-.why-grid,.services-grid,.avis-grid{grid-template-columns:1fr}
+.why-grid,.services-grid,.avis-grid,.ops-cards{grid-template-columns:1fr}
 .temo-inner,.about-inner{grid-template-columns:1fr;gap:2.5rem}
-.nav-links{gap:0}.nav-link{padding:8px 8px;font-size:11px}
+.nav-links{gap:0}.nav-link{padding:8px 6px;font-size:11px}
 .about-values{grid-template-columns:1fr}
+.ops-stats{gap:1.5rem;flex-wrap:wrap}
 footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
 </style>
 </head>
@@ -219,17 +276,17 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
   <div class="nav-inner">
     <div class="logo">Estimation<span>Terrain</span>.fr</div>
     <div class="nav-links">
-      <button class="nav-link active" onclick="showPage('accueil',this)">Accueil</button>
-      <button class="nav-link" onclick="showPage('approche',this)">Notre approche</button>
-      <button class="nav-link" onclick="showPage('simulateur',this)">Simulateur</button>
-      <button class="nav-link" onclick="showPage('about',this)">Qui sommes-nous</button>
-      <button class="nav-link" onclick="showPage('mentions',this)">Mentions légales</button>
+      <button class="nav-link active" id="nav-accueil">Accueil</button>
+      <button class="nav-link" id="nav-approche">Notre approche</button>
+      <button class="nav-link" id="nav-simulateur">Simulateur</button>
+      <button class="nav-link" id="nav-about">Qui sommes-nous</button>
+      <button class="nav-link" id="nav-mentions">Mentions légales</button>
     </div>
-    <button class="nav-cta" onclick="showPage('simulateur',document.querySelectorAll('.nav-link')[2])">Estimer mon terrain</button>
+    <button class="nav-cta" id="nav-cta-btn">Estimer mon terrain</button>
   </div>
 </nav>
 
-<!-- ACCUEIL -->
+<!-- ══ ACCUEIL ══════════════════════════════════════════════════════════════ -->
 <div class="page active" id="page-accueil">
   <div class="hero">
     <div class="hero-left">
@@ -250,7 +307,7 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
         <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" id="hp1"/>
         <div class="sfield">
           <label>Adresse du bien</label>
-          <input type="text" id="adr-h" placeholder="15 rue des Lilas, 95250..." autocomplete="off"/>
+          <input type="text" id="adr-h" placeholder="15 rue des Lilas, 92320..." autocomplete="off"/>
           <div class="autocomplete-list" id="ac-h"></div>
         </div>
         <div class="cadastre-info" id="cad-h"></div>
@@ -279,8 +336,13 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
           <div class="jauge-bar"><div class="jauge-fill" id="jf-h"></div></div>
           <div class="jauge-labels"><span>Limité</span><span>Modéré</span><span>Élevé</span><span>Exceptionnel</span></div>
           <div class="res-card" id="rc-h"><div class="res-card-title" id="rt-h"></div><div class="res-card-text" id="rx-h"></div></div>
-          <div class="fourchette-block" id="fb-h"><div class="fourchette-label">Valorisation estimée</div><div class="fourchette-val" id="fv-h">—</div><div class="fourchette-sub">Étude personnalisée pour affiner</div></div>
-          <button class="cta-etude" onclick="openModal()">Recevoir mon étude détaillée gratuite sous 72h</button>
+          <div class="fourchette-block" id="fb-h">
+            <div class="fourchette-eyebrow">Ce que peut vous rapporter votre terrain</div>
+            <div class="fourchette-val" id="fv-h">—</div>
+            <div class="fourchette-pitch" id="fp-h">Une étude personnalisée affinera cette estimation</div>
+            <div class="fourchette-urgence">🔒 Estimation confidentielle · valable 30 jours</div>
+          </div>
+          <button class="cta-etude" id="cta-etude-h">Recevoir mon étude détaillée gratuite sous 72h →</button>
           <div style="font-size:11px;color:var(--gris);text-align:center;margin-top:5px">Sans engagement · Aucun opérateur contacté sans votre accord</div>
         </div>
       </div>
@@ -298,10 +360,10 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
         <div class="choc-arrow">→</div>
         <div class="choc-card green"><div class="choc-label">Appel d'offres · Plusieurs opérateurs</div><div class="choc-price">600 000 €</div><div class="choc-detail">Le terrain part au meilleur prix · Nous négocions pour vous</div></div>
       </div>
-      <div class="choc-note">* Exemple zone UA grande couronne parisienne · Les résultats varient selon la commune, le zonage et la surface · Le promoteur fait ce calcul avant même de vous appeler.</div>
+      <div class="choc-note">* Exemple zone UA grande couronne parisienne · Les résultats varient selon la commune, le zonage et la surface</div>
       <div class="why-grid">
         <div class="why-card"><div class="why-num">01</div><div class="why-title">Quand il vous appelle, c'est trop tard</div><div class="why-text">Le promoteur a déjà fait son bilan. Il sait exactement combien il peut vous proposer — et combien il garde. Vous, non.</div></div>
-        <div class="why-card"><div class="why-num">02</div><div class="why-title">Votre maison, il ne la voit pas</div><div class="why-text">Il voit des mètres carrés constructibles. Votre jardin, c'est peut-être un immeuble de 4 étages dans sa tête. Notre outil calcule ce qu'il calcule.</div></div>
+        <div class="why-card"><div class="why-num">02</div><div class="why-title">Votre maison, il ne la voit pas</div><div class="why-text">Il voit des mètres carrés constructibles. Votre jardin, c'est peut-être un immeuble dans sa tête. Notre outil calcule ce qu'il calcule.</div></div>
         <div class="why-card"><div class="why-num">03</div><div class="why-title">La concurrence, c'est votre seul levier</div><div class="why-text">Un seul promoteur ? Il fixe le prix. Plusieurs en compétition ? Vous fixez le prix. C'est aussi simple que ça.</div></div>
       </div>
     </div>
@@ -317,19 +379,19 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
       <div class="avis-grid">
         <div class="avis-card">
           <div class="avis-stars">★★★★★</div>
-          <div class="avis-text">"On avait une offre d'agence à 320 000 €. Après analyse et mise en concurrence, on a signé à 470 000 €. On n'y croyait vraiment pas."</div>
+          <div class="avis-text">« On avait une offre d'agence à 320 000 €. Après analyse et mise en concurrence, on a signé à 470 000 €. On n'y croyait vraiment pas. »</div>
           <div class="avis-author"><div class="avis-avatar"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&q=80&auto=format&fit=crop&crop=face" alt=""/></div><div><div class="avis-name">Michel & Sylvie D.</div><div class="avis-detail">Propriétaires · Val-d'Oise · 580 m²</div></div></div>
           <div class="avis-result">+ 150 000 € vs l'estimation agence</div>
         </div>
         <div class="avis-card">
           <div class="avis-stars">★★★★★</div>
-          <div class="avis-text">"J'ai hérité de la maison de mes parents. L'estimation m'a montré que le terrain valait bien plus que prévu. Simple et sans démarchage."</div>
+          <div class="avis-text">« J'ai hérité de la maison de mes parents. L'estimation m'a montré que le terrain valait bien plus que prévu. Simple et sans démarchage. »</div>
           <div class="avis-author"><div class="avis-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80&auto=format&fit=crop&crop=face" alt=""/></div><div><div class="avis-name">Thomas M.</div><div class="avis-detail">Héritier · Essonne · 420 m²</div></div></div>
           <div class="avis-result">Potentiel inattendu révélé</div>
         </div>
         <div class="avis-card">
           <div class="avis-stars">★★★★☆</div>
-          <div class="avis-text">"La division parcellaire m'a permis de vendre le fond du jardin tout en restant dans ma maison. Une solution que je ne connaissais pas."</div>
+          <div class="avis-text">« La division parcellaire m'a permis de vendre le fond du jardin tout en restant dans ma maison. Une solution que je ne connaissais pas. »</div>
           <div class="avis-author"><div class="avis-avatar"><img src="https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?w=80&q=80&auto=format&fit=crop&crop=face" alt=""/></div><div><div class="avis-name">Bernard F.</div><div class="avis-detail">Sénior · Seine-et-Marne · 750 m²</div></div></div>
           <div class="avis-result">Division parcellaire réussie</div>
         </div>
@@ -355,12 +417,12 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
     <div class="eyebrow" style="justify-content:center;display:flex;margin-bottom:1rem">Prenez une décision éclairée</div>
     <h2>Le promoteur a déjà fait le calcul.<br>Faites-le aussi.</h2>
     <p>60 secondes. C'est tout ce qu'il faut pour savoir si vous êtes sur le point de laisser une fortune sur la table.</p>
-    <button class="sim-btn" style="max-width:320px;margin:0 auto;display:block" onclick="showPage('simulateur',document.querySelectorAll('.nav-link')[2])">Estimer mon terrain maintenant</button>
+    <button class="sim-btn" style="max-width:320px;margin:0 auto;display:block" id="cta-final-btn">Estimer mon terrain maintenant</button>
     <div class="cta-guarantee">GRATUIT · CONFIDENTIEL · SANS ENGAGEMENT</div>
   </section>
 </div>
 
-<!-- NOTRE APPROCHE -->
+<!-- ══ NOTRE APPROCHE ════════════════════════════════════════════════════════ -->
 <div class="page" id="page-approche">
   <section class="services" style="padding-top:5rem">
     <div class="services-inner">
@@ -371,9 +433,9 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
         <div class="independant-banner"><div class="independant-banner-text"><strong>Indépendance totale</strong>Nous ne sommes liés à aucun promoteur. Aucun opérateur n'est contacté sans votre accord explicite.</div></div>
       </div>
       <div class="services-grid">
-        <div class="service-card"><div class="service-img"><img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80&auto=format&fit=crop" alt=""/></div><div class="service-body"><div class="service-tag est">Estimation gratuite</div><div class="service-h3">Connaître la valeur réelle de votre terrain</div><div class="service-text">Notre outil analyse les données d'urbanisme et les prix du marché local. Résultat immédiat avec données cadastrales officielles. Étude personnalisée sous 72h.</div><button class="service-cta" onclick="showPage('simulateur',document.querySelectorAll('.nav-link')[2])">Lancer l'estimation</button></div></div>
-        <div class="service-card"><div class="service-img"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80&auto=format&fit=crop" alt=""/></div><div class="service-body"><div class="service-tag div">Division parcellaire</div><div class="service-h3">Vous restez chez vous — et vous valorisez quand même</div><div class="service-text">Si votre terrain est suffisamment grand, il est possible de détacher une partie constructible et de la valoriser, tout en conservant votre maison.</div><button class="service-cta" onclick="openModal()">Étudier cette option</button></div></div>
-        <div class="service-card"><div class="service-img"><img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&q=80&auto=format&fit=crop" alt=""/></div><div class="service-body"><div class="service-tag ao">Appel d'offres</div><div class="service-h3">Mettre plusieurs opérateurs en concurrence</div><div class="service-text">Signer avec le premier opérateur est souvent une erreur. Nous organisons un appel d'offres confidentiel pour que votre terrain parte au meilleur prix.</div><button class="service-cta" onclick="openModal()">En savoir plus</button></div></div>
+        <div class="service-card"><div class="service-img"><img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80&auto=format&fit=crop" alt=""/></div><div class="service-body"><div class="service-tag est">Estimation gratuite</div><div class="service-h3">Connaître la valeur réelle de votre terrain</div><div class="service-text">Notre outil analyse les données d'urbanisme et les prix du marché local. Résultat immédiat. Étude personnalisée sous 72h.</div><button class="service-cta" id="approche-sim-btn">Lancer l'estimation</button></div></div>
+        <div class="service-card"><div class="service-img"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80&auto=format&fit=crop" alt=""/></div><div class="service-body"><div class="service-tag div">Division parcellaire</div><div class="service-h3">Vous restez chez vous — et vous valorisez quand même</div><div class="service-text">Si votre terrain est suffisamment grand, il est possible de détacher une partie constructible et de la valoriser, tout en conservant votre maison.</div><button class="service-cta" id="approche-modal-btn1">Étudier cette option</button></div></div>
+        <div class="service-card"><div class="service-img"><img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&q=80&auto=format&fit=crop" alt=""/></div><div class="service-body"><div class="service-tag ao">Appel d'offres</div><div class="service-h3">Mettre plusieurs opérateurs en concurrence</div><div class="service-text">Signer avec le premier opérateur est souvent une erreur. Nous organisons un appel d'offres confidentiel pour que votre terrain parte au meilleur prix.</div><button class="service-cta" id="approche-modal-btn2">En savoir plus</button></div></div>
       </div>
     </div>
   </section>
@@ -381,29 +443,29 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
     <div class="faq-inner">
       <div class="eyebrow">Questions fréquentes</div>
       <h2 class="section-h2" style="margin-bottom:2.5rem">Ce que vous souhaitez savoir</h2>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Est-ce vraiment gratuit ?<div class="faq-icon">+</div></div><div class="faq-a">Oui, intégralement. L'estimation, l'étude et la mise en relation sont gratuites pour le propriétaire.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Êtes-vous liés à un promoteur ?<div class="faq-icon">+</div></div><div class="faq-a">Non. Nous sommes totalement indépendants. Aucun opérateur n'est contacté sans votre accord explicite. Notre rémunération est prise en charge par l'opérateur, jamais par vous.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Mon terrain est-il intéressant ?<div class="faq-icon">+</div></div><div class="faq-a">Tout dépend du zonage, de la surface et de la localisation. Notre outil analyse ces critères automatiquement et vous donne une réponse honnête.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Comment fonctionne la division parcellaire ?<div class="faq-icon">+</div></div><div class="faq-a">Si votre terrain est suffisamment grand, il est possible de le diviser pour vendre une partie constructible tout en conservant votre maison.</div></div>
-      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Combien de temps prend une vente ?<div class="faq-icon">+</div></div><div class="faq-a">Entre la promesse et l'acte, comptez 12 à 24 mois. Vous percevez souvent une indemnité d'immobilisation dès la signature.</div></div>
+      <div class="faq-item"><div class="faq-q">Est-ce vraiment gratuit ?<div class="faq-icon">+</div></div><div class="faq-a">Oui, intégralement. L'estimation, l'étude et la mise en relation sont gratuites pour le propriétaire.</div></div>
+      <div class="faq-item"><div class="faq-q">Êtes-vous liés à un promoteur ?<div class="faq-icon">+</div></div><div class="faq-a">Non. Nous sommes totalement indépendants. Aucun opérateur n'est contacté sans votre accord explicite. Notre rémunération est prise en charge par l'opérateur, jamais par vous.</div></div>
+      <div class="faq-item"><div class="faq-q">Mon terrain est-il intéressant ?<div class="faq-icon">+</div></div><div class="faq-a">Tout dépend du zonage, de la surface et de la localisation. Notre outil analyse ces critères automatiquement et vous donne une réponse honnête.</div></div>
+      <div class="faq-item"><div class="faq-q">Comment fonctionne la division parcellaire ?<div class="faq-icon">+</div></div><div class="faq-a">Si votre terrain est suffisamment grand, il est possible de le diviser pour vendre une partie constructible tout en conservant votre maison.</div></div>
+      <div class="faq-item"><div class="faq-q">Combien de temps prend une vente ?<div class="faq-icon">+</div></div><div class="faq-a">Entre la promesse et l'acte, comptez 12 à 24 mois. Vous percevez souvent une indemnité d'immobilisation dès la signature.</div></div>
     </div>
   </section>
 </div>
 
-<!-- SIMULATEUR PAGE -->
+<!-- ══ SIMULATEUR ════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-simulateur">
   <section style="background:var(--nuit);padding:4rem 2rem;min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center">
     <div style="width:100%;max-width:500px">
       <div style="text-align:center;margin-bottom:2rem">
         <div class="eyebrow" style="justify-content:center;display:flex;margin-bottom:.75rem">Estimation gratuite</div>
-        <h2 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:.75rem">Quel est le potentiel<br>de votre terrain ?</h2>
+        <h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:.75rem">Quel est le potentiel<br>de votre terrain ?</h2>
         <p style="font-size:14px;color:var(--gris)">Données cadastrales officielles · Résultat immédiat · Sans inscription</p>
       </div>
       <div class="sim-box" style="max-width:none">
         <input class="hp" type="text" name="website2" tabindex="-1" autocomplete="off" id="hp2"/>
         <div class="sfield">
           <label>Adresse du bien</label>
-          <input type="text" id="adr-s" placeholder="15 rue des Lilas, 95250..." autocomplete="off"/>
+          <input type="text" id="adr-s" placeholder="15 rue des Lilas, 92320..." autocomplete="off"/>
           <div class="autocomplete-list" id="ac-s"></div>
         </div>
         <div class="cadastre-info" id="cad-s"></div>
@@ -432,8 +494,13 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
           <div class="jauge-bar"><div class="jauge-fill" id="jf-s"></div></div>
           <div class="jauge-labels"><span>Limité</span><span>Modéré</span><span>Élevé</span><span>Exceptionnel</span></div>
           <div class="res-card" id="rc-s"><div class="res-card-title" id="rt-s"></div><div class="res-card-text" id="rx-s"></div></div>
-          <div class="fourchette-block" id="fb-s"><div class="fourchette-label">Valorisation estimée</div><div class="fourchette-val" id="fv-s">—</div><div class="fourchette-sub">Étude personnalisée pour affiner</div></div>
-          <button class="cta-etude" onclick="openModal()">Recevoir mon étude détaillée gratuite sous 72h</button>
+          <div class="fourchette-block" id="fb-s">
+            <div class="fourchette-eyebrow">Ce que peut vous rapporter votre terrain</div>
+            <div class="fourchette-val" id="fv-s">—</div>
+            <div class="fourchette-pitch" id="fp-s">Une étude personnalisée affinera cette estimation</div>
+            <div class="fourchette-urgence">🔒 Estimation confidentielle · valable 30 jours</div>
+          </div>
+          <button class="cta-etude" id="cta-etude-s">Recevoir mon étude détaillée gratuite sous 72h →</button>
           <div style="font-size:11px;color:var(--gris);text-align:center;margin-top:5px">Sans engagement · Aucun opérateur contacté sans votre accord</div>
         </div>
       </div>
@@ -441,7 +508,117 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
   </section>
 </div>
 
-<!-- QUI SOMMES-NOUS -->
+<!-- ══ OPÉRATEURS FONCIERS ════════════════════════════════════════════════════ -->
+<div class="page" id="page-operateurs">
+  <section class="ops-hero">
+    <div class="ops-hero-inner">
+      <div class="eyebrow" style="justify-content:center;display:flex;margin-bottom:1rem">Pour les professionnels</div>
+      <h1>Accédez aux meilleures<br>opportunités foncières<br><em>en avant-première</em></h1>
+      <p>Nous recevons chaque semaine des demandes d'estimation de propriétaires qualifiés en Île-de-France. Chaque mise en concurrence est organisée avec plusieurs opérateurs sélectionnés — le propriétaire reste libre de son choix. Nous analysons la solidité financière de chaque candidat avant toute mise en relation.</p>
+      <div class="ops-stats">
+        <div>
+          <span class="ops-stat-num">+200</span>
+          <div class="ops-stat-label">leads propriétaires / mois</div>
+        </div>
+        <div>
+          <span class="ops-stat-num">85%</span>
+          <div class="ops-stat-label">en zone constructible</div>
+        </div>
+        <div>
+          <span class="ops-stat-num">0 €</span>
+          <div class="ops-stat-label">à l'inscription</div>
+        </div>
+        <div>
+          <span class="ops-stat-num">72h</span>
+          <div class="ops-stat-label">délai moyen d'alerte</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ops-avantages">
+    <div class="ops-avantages-inner">
+      <h2>Pourquoi rejoindre notre réseau ?</h2>
+      <p class="ops-avantages-sub">Nous faisons le travail amont : identification, qualification, estimation. Vous n'intervenez que sur des dossiers déjà analysés.</p>
+      <div class="ops-cards">
+        <div class="ops-card">
+          <div class="ops-card-icon">🎯</div>
+          <div class="ops-card-title">Dossiers pré-qualifiés</div>
+          <div class="ops-card-text">Chaque dossier est accompagné d'une analyse PLU, d'une surface cadastrale officielle et d'une estimation de la charge foncière. Vous gagnez un temps considérable sur la phase de sourcing.</div>
+        </div>
+        <div class="ops-card">
+          <div class="ops-card-icon">📍</div>
+          <div class="ops-card-title">Ciblage géographique précis</div>
+          <div class="ops-card-text">Vous définissez vos zones d'intervention, vos critères de taille et de type de bien. Nous ne vous envoyons que les dossiers qui correspondent à vos critères opérationnels.</div>
+        </div>
+        <div class="ops-card">
+          <div class="ops-card-icon">🤝</div>
+          <div class="ops-card-title">Mise en concurrence équitable</div>
+          <div class="ops-card-text">Pour chaque dossier, plusieurs opérateurs sont consultés. Le propriétaire choisit librement. Vous êtes en compétition sur les meilleures conditions, pas sur le démarchage.</div>
+        </div>
+        <div class="ops-card">
+          <div class="ops-card-icon">🔒</div>
+          <div class="ops-card-title">Confidentialité totale</div>
+          <div class="ops-card-text">Les coordonnées du propriétaire ne sont transmises qu'après accord de sa part. Aucun risque de contact non sollicité, aucune fuite d'information vers la concurrence.</div>
+        </div>
+        <div class="ops-card">
+          <div class="ops-card-icon">⚡</div>
+          <div class="ops-card-title">Réactivité maximale</div>
+          <div class="ops-card-text">Vous êtes alerté dès qu'un dossier correspondant à vos critères est validé. Les meilleurs dossiers partent vite — notre réseau vous donne l'avantage de la réactivité.</div>
+        </div>
+        <div class="ops-card">
+          <div class="ops-card-icon">💶</div>
+          <div class="ops-card-title">Rémunération simple</div>
+          <div class="ops-card-text">Notre commission est prise sur la transaction, uniquement en cas de succès. Aucun abonnement, aucun forfait. Vous ne payez que si vous achetez.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ops-form-section">
+    <div class="ops-form-inner">
+      <h2>Rejoindre le réseau</h2>
+      <p>Remplissez ce formulaire. Nous analysons votre solidité financière et votre sérieux avant de vous mettre en relation avec nos propriétaires. Seuls les opérateurs qualifiés accèdent à nos dossiers.</p>
+      <div class="ops-form">
+        <input class="hp" type="text" name="website3" tabindex="-1" autocomplete="off" id="hp3"/>
+        <div class="mrow">
+          <div class="mfield"><label>Prénom</label><input type="text" id="op-prenom" placeholder="Jean"/></div>
+          <div class="mfield"><label>Nom</label><input type="text" id="op-nom" placeholder="Dupont"/></div>
+        </div>
+        <div class="mfield"><label>Société / Structure</label><input type="text" id="op-societe" placeholder="Groupe Immobilier Dupont"/></div>
+        <div class="mfield"><label>Email professionnel</label><input type="email" id="op-email" placeholder="jean.dupont@societe.fr"/></div>
+        <div class="mfield"><label>Téléphone</label><input type="tel" id="op-tel" placeholder="06 00 00 00 00"/></div>
+        <div class="mfield">
+          <label>Type d'opérateur</label>
+          <select id="op-type">
+            <option value="">Sélectionner...</option>
+            <option value="promoteur">Promoteur immobilier</option>
+            <option value="investisseur">Investisseur / Marchand de biens</option>
+            <option value="bailleur">Bailleur social</option>
+            <option value="fonciere">Foncière</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="mfield"><label>Zones géographiques ciblées</label><input type="text" id="op-zones" placeholder="ex : 92, 78, 91 — Ile-de-France Sud"/></div>
+        <div class="mfield"><label>Surface terrain minimum recherchée (m²)</label><input type="number" id="op-surface" placeholder="300"/></div>
+        <div class="mfield"><label>Message (optionnel)</label><textarea id="op-message" placeholder="Décrivez vos critères opérationnels spécifiques..."></textarea></div>
+        <button class="modal-submit" id="op-submit-btn">Soumettre ma candidature</button>
+        <div class="modal-err" id="op-err">Une erreur est survenue. Veuillez réessayer.</div>
+        <div class="modal-ok" id="op-ok">
+          <div class="modal-ok-title">Candidature reçue ✓</div>
+          <div class="modal-ok-text">Nous avons bien reçu votre profil. Notre équipe vous contacte sous 48h pour finaliser votre inscription et paramétrer vos alertes.</div>
+        </div>
+      </div>
+      <div class="ops-reassurance">
+        <div class="ops-reass-item">Aucun abonnement</div>
+        <div class="ops-reass-item">Commission au succès uniquement</div>
+        <div class="ops-reass-item">Dossiers pré-qualifiés</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══ QUI SOMMES-NOUS ═══════════════════════════════════════════════════════ -->
 <div class="page" id="page-about">
   <section class="about">
     <div class="about-inner">
@@ -456,26 +633,26 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
           <div class="value-item"><div class="value-title">Indépendance</div><div class="value-text">Aucun lien avec aucun opérateur. Notre seul intérêt est de maximiser votre valorisation.</div></div>
           <div class="value-item"><div class="value-title">Transparence</div><div class="value-text">Nos analyses s'appuient sur des données officielles. Nous expliquons chaque résultat.</div></div>
           <div class="value-item"><div class="value-title">Confidentialité</div><div class="value-text">Vos données ne sont jamais partagées sans votre accord. Zéro démarchage non sollicité.</div></div>
-          <div class="value-item"><div class="value-title">Expertise</div><div class="value-text">Connaissance opérationnelle du bilan promoteur et des règles d'urbanisme.</div></div>
+          <div class="value-item"><div class="value-title">Expertise</div><div class="value-text">Connaissance opérationnelle du bilan promoteur et des règles d'urbanisme en Île-de-France.</div></div>
         </div>
       </div>
     </div>
   </section>
 </div>
 
-<!-- MENTIONS -->
+<!-- ══ MENTIONS LÉGALES ══════════════════════════════════════════════════════ -->
 <div class="page" id="page-mentions">
   <section class="mentions">
     <div class="mentions-inner">
       <h2>Mentions légales</h2>
       <h3>Éditeur du site</h3>
-      <p>EstimationTerrain.fr est édité par [Nom de la société], [Forme juridique], immatriculée au RCS de [Ville] sous le numéro [SIREN], dont le siège social est situé au [Adresse].<br>Contact : <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="72111d1c06131106321701061b1f13061b1d1c06170000131b1c5c1400">[email&#160;protected]</a></p>
+      <p>EstimationTerrain.fr est édité par [Nom de la société], [Forme juridique], immatriculée au RCS de [Ville] sous le numéro [SIREN], dont le siège social est situé au [Adresse].<br>Contact : contact@estimationterrain.fr</p>
       <h3>Nature de l'activité</h3>
       <p>EstimationTerrain.fr est un outil d'information et d'estimation foncière. Il ne constitue pas une agence immobilière au sens de la loi Hoguet du 2 janvier 1970 et n'exerce pas d'activité d'entremise immobilière.</p>
       <p>L'activité consiste à : fournir gratuitement une estimation indicative du potentiel constructible ; collecter, avec accord explicite, des données relatives au bien ; transmettre, avec accord préalable, ces données à des opérateurs fonciers dans le cadre d'une mise en relation commerciale. Cette activité ne requiert pas de carte professionnelle T.</p>
       <p><strong>Important :</strong> EstimationTerrain.fr n'est lié contractuellement à aucun promoteur. Aucune donnée n'est transmise sans l'accord explicite du propriétaire. La rémunération éventuelle est prise en charge par l'opérateur foncier, jamais par le propriétaire.</p>
       <h3>Données personnelles</h3>
-      <p>Les données collectées sont utilisées exclusivement pour fournir l'estimation et, avec votre accord, pour vous mettre en relation avec des opérateurs pertinents. Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression : <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3655595842575542765345425f5b57425f595842534444575f58185044">[email&#160;protected]</a></p>
+      <p>Les données collectées sont utilisées exclusivement pour fournir l'estimation et, avec votre accord, pour vous mettre en relation avec des opérateurs pertinents. Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression : contact@estimationterrain.fr</p>
       <h3>Disclaimer</h3>
       <p>Les estimations ont un caractère purement indicatif et ne constituent pas une offre d'achat ni un avis de valeur opposable.</p>
       <h3>Hébergement</h3>
@@ -484,10 +661,10 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
   </section>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+<!-- ══ MODAL PROPRIÉTAIRE ════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">×</button>
+    <button class="modal-close" id="modal-close-btn">×</button>
     <div class="modal-badge">Étude gratuite · 72h · Sans engagement</div>
     <h3>Recevoir votre étude personnalisée</h3>
     <p class="modal-sub">Nos experts analysent votre dossier et vous présentent une estimation précise sous 72 heures. Gratuit, confidentiel. Aucun opérateur contacté sans votre accord.</p>
@@ -497,78 +674,84 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
     </div>
     <div class="mfield"><label>Email</label><input type="email" id="m-email" placeholder="marie.dupont@email.com"/></div>
     <div class="mfield"><label>Téléphone</label><input type="tel" id="m-tel" placeholder="06 00 00 00 00"/></div>
-    <button class="modal-submit" id="modal-submit" onclick="envoyerLead()">Recevoir mon étude gratuite sous 72h</button>
+    <button class="modal-submit" id="modal-submit">Recevoir mon étude gratuite sous 72h</button>
     <div class="modal-err" id="modal-err">Une erreur est survenue. Veuillez réessayer.</div>
-    <div class="modal-ok" id="modal-ok"><div class="modal-ok-title">Demande transmise</div><div class="modal-ok-text">Votre dossier est entre les mains de nos experts. Vous recevrez une analyse complète dans les 72 heures.</div></div>
+    <div class="modal-ok" id="modal-ok"><div class="modal-ok-title">Demande transmise ✓</div><div class="modal-ok-text">Votre dossier est entre les mains de nos experts. Vous recevrez une analyse complète dans les 72 heures.</div></div>
   </div>
 </div>
 
 <footer>
   <div class="footer-logo">Estimation<span>Terrain</span>.fr</div>
   <div>© 2026 — Estimation gratuite et sans engagement</div>
-  <div><a onclick="showPage('mentions',document.querySelectorAll('.nav-link')[4])">Mentions légales</a> · <a onclick="showPage('mentions',document.querySelectorAll('.nav-link')[4])">Confidentialité</a></div>
+  <div>
+    <a id="footer-mentions">Mentions légales</a> ·
+    <a id="footer-confidentialite">Confidentialité</a> ·
+    <a id="footer-operateurs" style="opacity:.4;font-size:11px">Espace opérateurs fonciers</a>
+  </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const VERCEL='https://simulateur-promoteur-git-main-max-immos-projects.vercel.app';
 
-// ─── État global ──────────────────────────────────────────────────────────────
-const state={};   // state['h'] et state['s'] — données par simulateur
-const maps={};    // instances Leaflet
-const acT={};     // timers autocomplete
+// ─── État global ───────────────────────────────────────────────────────────────
+const state={};
+const maps={};
+const acT={};
 
-// ─── Utilitaires UI ───────────────────────────────────────────────────────────
-function isBot(){return document.getElementById('hp1')?.value||document.getElementById('hp2')?.value}
-function showPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');window.scrollTo(0,0)}
+// ─── Navigation (zero inline handlers) ────────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(function(b){b.classList.remove('active')});
+  var nb=document.getElementById('nav-'+id);
+  if(nb)nb.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ─── Utilitaires ──────────────────────────────────────────────────────────────
+function isBot(){return document.getElementById('hp1').value||document.getElementById('hp2').value||document.getElementById('hp3').value}
 function toggleFaq(el){el.classList.toggle('open');el.querySelector('.faq-icon').textContent=el.classList.contains('open')?'−':'+'}
-function openModal(){document.getElementById('modal-overlay').classList.add('open')}
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
-function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
-function toggleBati(k){const t=document.getElementById('type-'+k).value;document.getElementById('bati-wrap-'+k).style.display=t==='maison'?'block':'none'}
-function fmt(n){if(!n||isNaN(n))return'—';return n>=1000000?(n/1000000).toFixed(2).replace('.',',')+' M€':Math.round(n/1000)+'K €'}
+function openModal(){document.getElementById('modal-overlay').style.display='flex'}
+function closeModal(){document.getElementById('modal-overlay').style.display='none'}
+function toggleBati(k){document.getElementById('bati-wrap-'+k).style.display=document.getElementById('type-'+k).value==='maison'?'block':'none'}
+function fmt(n){
+  if(!n||isNaN(n)||n<=0)return null;
+  if(n>=1000000)return (n/1000000).toFixed(2).replace('.',',')+' M€';
+  return Math.round(n/1000)+'K €';
+}
 
 // ─── Autocomplete BAN ─────────────────────────────────────────────────────────
 function onAdrInput(val,k){clearTimeout(acT[k]);if(val.length<4){hideAC(k);return}acT[k]=setTimeout(function(){fetchAC(val,k)},300)}
 async function fetchAC(val,k){
   try{
-    const r=await fetch('https://api-adresse.data.gouv.fr/search/?q='+encodeURIComponent(val)+'&limit=5&autocomplete=1');
-    const d=await r.json();
-    renderAC(d.features||[],k);
+    var r=await fetch('https://api-adresse.data.gouv.fr/search/?q='+encodeURIComponent(val)+'&limit=5&autocomplete=1');
+    var d=await r.json();renderAC(d.features||[],k);
   }catch{}
 }
 function renderAC(features,k){
-  const list=document.getElementById('ac-'+k);
+  var list=document.getElementById('ac-'+k);
   if(!features.length){list.style.display='none';return}
-  list.innerHTML=features.map(function(f,i){
-    return '<div class="autocomplete-item" data-i="'+i+'">'+f.properties.label+'</div>';
-  }).join('');
-  list._features=features;
-  list.style.display='block';
-  // Attacher les clics via JS (Cloudflare safe)
-  list.querySelectorAll('.autocomplete-item').forEach(function(el){
-    el.addEventListener('click',function(){pickAdr(parseInt(el.dataset.i),k)});
-  });
+  list.innerHTML=features.map(function(f,i){return '<div class="autocomplete-item" data-i="'+i+'">'+f.properties.label+'</div>'}).join('');
+  list._features=features;list.style.display='block';
+  list.querySelectorAll('.autocomplete-item').forEach(function(el){el.addEventListener('click',function(){pickAdr(parseInt(el.dataset.i),k)})});
 }
-function hideAC(k){const l=document.getElementById('ac-'+k);if(l)l.style.display='none'}
+function hideAC(k){var l=document.getElementById('ac-'+k);if(l)l.style.display='none'}
 async function pickAdr(idx,k){
-  const list=document.getElementById('ac-'+k);
-  const f=list._features[idx];
-  const p=f.properties;
-  const lon=f.geometry.coordinates[0];
-  const lat=f.geometry.coordinates[1];
-  document.getElementById('adr-'+k).value=p.label;
-  hideAC(k);
+  var list=document.getElementById('ac-'+k);
+  var f=list._features[idx];var p=f.properties;
+  var lon=f.geometry.coordinates[0];var lat=f.geometry.coordinates[1];
+  document.getElementById('adr-'+k).value=p.label;hideAC(k);
   state[k]={lat:lat,lon:lon,insee:p.citycode,label:p.label};
-  initMap(k,lat,lon);
-  loadCadastre(k,lat,lon);
+  initMap(k,lat,lon);loadCadastre(k,lat,lon);
 }
 
 // ─── Carte Leaflet ────────────────────────────────────────────────────────────
 function initMap(k,lat,lon){
   document.getElementById('map-section-'+k).style.display='block';
   if(maps[k]){maps[k].setView([lat,lon],18);return}
-  const m=L.map('map-'+k,{zoomControl:true}).setView([lat,lon],18);
+  var m=L.map('map-'+k,{zoomControl:true}).setView([lat,lon],18);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:20,opacity:0.8}).addTo(m);
   L.tileLayer('https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=PCI%20vecteur&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image%2Fpng',{attribution:'IGN',maxZoom:20,opacity:0.6}).addTo(m);
   var marker=L.marker([lat,lon],{draggable:true}).addTo(m);
@@ -576,291 +759,389 @@ function initMap(k,lat,lon){
   marker.on('dragend',function(){var ll=marker.getLatLng();state[k]=Object.assign({},state[k]||{},{lat:ll.lat,lon:ll.lng});loadCadastre(k,ll.lat,ll.lng)});
   maps[k]=m;
 }
-
 async function loadCadastre(k,lat,lon){
-  const cadEl=document.getElementById('cad-'+k);
-  cadEl.style.display='block';
-  cadEl.textContent='Identification de la parcelle...';
+  var cadEl=document.getElementById('cad-'+k);
+  cadEl.style.display='block';cadEl.textContent='Identification de la parcelle...';
   try{
-    const geom=encodeURIComponent(JSON.stringify({type:'Point',coordinates:[lon,lat]}));
-    const r=await fetch('https://apicarto.ign.fr/api/cadastre/parcelle?geom='+geom);
-    const d=await r.json();
+    var geom=encodeURIComponent(JSON.stringify({type:'Point',coordinates:[lon,lat]}));
+    var r=await fetch('https://apicarto.ign.fr/api/cadastre/parcelle?geom='+geom);
+    var d=await r.json();
     if(d.features&&d.features.length){
-      const props=d.features[0].properties;
-      const surf=props.contenance?Math.round(props.contenance):null;
-      if(surf){
-        document.getElementById('surf-'+k).value=surf;
-        cadEl.innerHTML='<strong>Cadastre :</strong> Parcelle '+props.section+props.numero+' · Surface officielle : <strong>'+surf+' m²</strong>';
-      } else {
-        cadEl.innerHTML='<strong>Cadastre :</strong> Parcelle '+props.section+props.numero+' identifiée';
-      }
+      var props=d.features[0].properties;
+      var surf=props.contenance?Math.round(props.contenance):null;
+      if(surf){document.getElementById('surf-'+k).value=surf;cadEl.innerHTML='<strong>Cadastre :</strong> Parcelle '+props.section+props.numero+' · Surface officielle : <strong>'+surf+' m²</strong>'}
+      else{cadEl.innerHTML='<strong>Cadastre :</strong> Parcelle '+props.section+props.numero+' identifiée'}
       state[k]=Object.assign({},state[k]||{},{cadastre:{surface:surf,section:props.section,numero:props.numero,commune:props.commune}});
       if(maps[k]){
         if(maps[k]._pl)maps[k].removeLayer(maps[k]._pl);
         var layer=L.geoJSON(d.features[0].geometry,{style:{color:'#10B981',weight:2.5,fillOpacity:.15,fillColor:'#10B981'}}).addTo(maps[k]);
-        maps[k]._pl=layer;
-        maps[k].fitBounds(layer.getBounds(),{padding:[20,20]});
+        maps[k]._pl=layer;maps[k].fitBounds(layer.getBounds(),{padding:[20,20]});
       }
-    } else {
-      cadEl.textContent='Parcelle non identifiée à cet endroit — vérifiez l\'adresse';
-    }
+    } else {cadEl.textContent='Parcelle non identifiée — vérifiez l\'adresse'}
   }catch(e){cadEl.style.display='none'}
 }
 
-// ─── Score potentiel (inchangé — logique de présentation) ────────────────────
-// Le score détermine uniquement le texte et la jauge, pas la fourchette.
-// La fourchette vient désormais entièrement de l'API (calcul promoteur réel).
-function scoreFromBilan(bilan,zone){
-  if(!bilan||!bilan.constructible)return 0;
-  const shabNette=bilan.calcul&&bilan.calcul.shab_nette||0;
-  const zoneKey=(bilan.zone_key||zone||'').toUpperCase();
-  // Score basé sur SHAB nette calculée par l'API
-  if(shabNette<=0)return 0;
+// ─── Score potentiel ──────────────────────────────────────────────────────────
+function scoreFromData(data,terrain){
+  var bilan=data.bilan||{};
+  if(!bilan.constructible)return 0;
+  var shabNette=(bilan.calcul&&bilan.calcul.shab_nette)||0;
+  var zoneKey=((bilan.zone_key||data.zone_plu&&data.zone_plu.key||'')).toUpperCase();
+  // Score sur 100 basé sur SHAB nette
+  if(shabNette<=0){
+    // Fallback sur surface terrain si pas de bilan API complet
+    var s=parseFloat(terrain)||0;
+    if(s>=1000)return 72; if(s>=500)return 55; if(s>=300)return 40; return 28;
+  }
   if(zoneKey.startsWith('U3')||zoneKey.startsWith('U4'))return shabNette>800?92:78;
   if(zoneKey.startsWith('U2'))return shabNette>400?84:70;
   if(zoneKey==='U1E'||zoneKey==='U1B')return shabNette>250?72:58;
   if(zoneKey.startsWith('U1'))return shabNette>150?62:48;
-  return 40;
+  return 45;
 }
 
-// ─── Affichage résultat ───────────────────────────────────────────────────────
+// ─── Affichage résultat — version vendeur ─────────────────────────────────────
 function afficherResultat(k,data){
-  const bilan=data.bilan||{};
-  const terrain=document.getElementById('surf-'+k).value;
-  const zoneLibelle=data.zone_plu&&data.zone_plu.libelle||data.zone&&data.zone.libelle||'Zone identifiée';
-  const zoneKey=data.zone_plu&&data.zone_plu.key||data.bilan&&data.bilan.zone_key||'';
+  var bilan=data.bilan||{};
+  var terrain=document.getElementById('surf-'+k).value;
+  var zoneLibelle=(data.zone_plu&&data.zone_plu.libelle)||(data.zone&&data.zone.libelle)||'Zone identifiée';
+  var zoneCode=(data.zone_plu&&data.zone_plu.code)||'';
+  var score=scoreFromData(data,terrain);
 
-  // Mise à jour surface cadastrale
   if(data.surface_terrain&&!document.getElementById('surf-'+k).value){
     document.getElementById('surf-'+k).value=data.surface_terrain;
+    terrain=data.surface_terrain;
   }
 
-  // Score et jauge
-  const score=scoreFromBilan(bilan,zoneKey);
   document.getElementById('res-'+k).style.display='block';
   setTimeout(function(){document.getElementById('jf-'+k).style.width=score+'%'},100);
 
-  // Carte résultat
-  const card=document.getElementById('rc-'+k);
-  const title=document.getElementById('rt-'+k);
-  const text=document.getElementById('rx-'+k);
+  var card=document.getElementById('rc-'+k);
+  var title=document.getElementById('rt-'+k);
+  var text=document.getElementById('rx-'+k);
 
+  // Carte résultat — message vendeur émotionnel
   if(!bilan.constructible){
     card.className='res-card faible';
-    title.textContent='Zone non constructible';
-    text.textContent='Ce terrain est situé en '+zoneLibelle+'. Aucun programme résidentiel ne peut y être réalisé dans les conditions actuelles du PLU.';
-    document.getElementById('fb-'+k).style.display='none';
-    return;
+    title.textContent='Zone non constructible actuellement';
+    text.textContent='Ce bien est en zone '+zoneLibelle+'. Des scénarios alternatifs (division, changement de PLU, bail emphytéotique) peuvent néanmoins exister. Nos experts peuvent analyser votre situation.';
+  } else if(score>=80){
+    card.className='res-card tres-fort';
+    title.textContent='🔥 Potentiel exceptionnel';
+    text.textContent='Votre terrain est exactement ce que recherchent les opérateurs fonciers. Dans votre zone, les propriétaires qui ont fait analyser leur bien ont obtenu en moyenne 2 à 4× le prix du marché résidentiel. Ne signez rien sans avoir fait jouer la concurrence.';
+  } else if(score>=65){
+    card.className='res-card fort';
+    title.textContent='✨ Potentiel élevé';
+    text.textContent='Votre terrain présente de réels atouts pour le développement immobilier. La zone '+zoneLibelle+' autorise une densification significative. Une mise en concurrence entre opérateurs peut considérablement augmenter votre prix de vente.';
+  } else if(score>=45){
+    card.className='res-card moyen';
+    title.textContent='📊 Potentiel modéré';
+    text.textContent='Votre terrain peut intéresser certains opérateurs. Le résultat final dépend des contraintes précises de votre parcelle. Une analyse personnalisée est essentielle avant toute décision.';
+  } else {
+    card.className='res-card faible';
+    title.textContent='Potentiel à préciser';
+    text.textContent='Les premières données suggèrent un intérêt limité dans les conditions actuelles. Cependant, certains scénarios spécifiques (division, bail, OAP...) peuvent créer de la valeur. Nos experts peuvent creuser votre dossier.';
   }
 
-  // Texte selon score
-  if(score>=80){card.className='res-card tres-fort';title.textContent='Potentiel exceptionnel';text.textContent='Votre terrain présente toutes les caractéristiques recherchées par les opérateurs fonciers (zone '+zoneLibelle+'). Une valorisation très significativement supérieure au marché résidentiel est envisageable.'}
-  else if(score>=65){card.className='res-card fort';title.textContent='Potentiel élevé';text.textContent='Votre bien en zone '+zoneLibelle+' présente de réels atouts constructifs. Une offre supérieure au prix marché résidentiel est probable.'}
-  else if(score>=45){card.className='res-card moyen';title.textContent='Potentiel modéré';text.textContent='Votre terrain en zone '+zoneLibelle+' peut intéresser certains opérateurs. Une analyse personnalisée permettra de confirmer les scénarios envisageables.'}
-  else{card.className='res-card faible';title.textContent='Potentiel limité';text.textContent='Les caractéristiques actuelles de la zone '+zoneLibelle+' limitent l\'intérêt pour un développement standard. Des scénarios spécifiques peuvent néanmoins exister.'}
+  // Fourchette — chiffres clés seulement, zéro jargon technique
+  var fbEl=document.getElementById('fb-'+k);
+  var fvEl=document.getElementById('fv-'+k);
+  var fpEl=document.getElementById('fp-'+k);
+  var vt=bilan.valeur_terrain;
+  var fmtLow=vt&&fmt(vt.low);
+  var fmtHigh=vt&&fmt(vt.high);
 
-  // Fourchette — source : API (calcul bilan promoteur réel)
-  const fbEl=document.getElementById('fb-'+k);
-  const fvEl=document.getElementById('fv-'+k);
-  const vt=bilan.valeur_terrain;
-
-  if(vt&&vt.low>0&&vt.high>0){
-    // Ligne principale : fourchette valeur terrain
-    const fourchette=fmt(vt.low)+' – '+fmt(vt.high);
-    fvEl.textContent=fourchette;
-
-    // Sous-label enrichi avec les paramètres clés
-    const ces=bilan.parametres&&bilan.parametres.ces?Math.round(bilan.parametres.ces*100)+'%':'—';
-    const shabNette=bilan.calcul&&bilan.calcul.shab_nette?Math.round(bilan.calcul.shab_nette)+' m²':'—';
-    const prixM2=data.prix_marche_m2?data.prix_marche_m2.toLocaleString('fr-FR')+' €/m²':'—';
-
-    // Prix au m² terrain
-    const low_m2=vt.low_m2?vt.low_m2.toLocaleString('fr-FR'):'—';
-    const high_m2=vt.high_m2?vt.high_m2.toLocaleString('fr-FR'):'—';
-
-    // Remplacer le sous-texte statique par des données réelles
-    const fbSub=fbEl.querySelector('.fourchette-sub');
-    if(fbSub){
-      fbSub.innerHTML='Zone '+zoneLibelle+' · CES '+ces+' · '+shabNette+' vendables · DVF '+prixM2+'<br><span style="font-size:10px;color:var(--nuit3)">'+low_m2+' – '+high_m2+' €/m² terrain</span>';
+  if(fmtLow&&fmtHigh&&vt.low>0){
+    // Affichage fourchette simple — sans détails techniques
+    fvEl.innerHTML=fmtLow+' <em>–</em> '+fmtHigh;
+    // Message vendeur selon niveau
+    if(score>=80){
+      fpEl.textContent='C\'est ce qu\'un opérateur pourrait vous proposer pour votre terrain, selon notre estimation. Obtenez une étude précise et faites jouer la concurrence.';
+    } else if(score>=65){
+      fpEl.textContent='Fourchette estimée selon les données du PLU et les prix de marché locaux. Une étude personnalisée permettra d\'affiner et de maximiser votre prix de vente.';
+    } else {
+      fpEl.textContent='Estimation indicative. Nos experts analyseront en détail les possibilités spécifiques à votre parcelle.';
     }
-
     fbEl.style.display='block';
-
-    // Mémoriser dans state pour l'email
-    state[k]=Object.assign({},state[k]||{},{
-      _bilan:bilan,
-      _fourchette:fourchette,
-      _shabNette:bilan.calcul&&bilan.calcul.shab_nette||0,
-      _ca:bilan.calcul&&bilan.calcul.ca_promoteur||0,
-      _cf:bilan.calcul&&bilan.calcul.charge_fonciere||0,
+    var btnRapport=document.getElementById('btn-rapport-'+k);
+    if(btnRapport)btnRapport.style.display='block';
+    // Mémoriser pour l'email admin (les détails restent côté serveur)
+    var _st={
+      _bilan:bilan,_fourchette:fmtLow+' – '+fmtHigh,
+      _shabNette:(bilan.calcul&&bilan.calcul.shab_nette)||0,
+      _ca_ttc:(bilan.calcul&&bilan.calcul.ca_ttc)||0,
+      _cout_travaux:(bilan.calcul&&bilan.calcul.cout_travaux)||0,
+      _marge:(bilan.calcul&&bilan.calcul.marge_promoteur)||0,
+      _cf:(bilan.calcul&&bilan.calcul.charge_fonciere)||0,
+      _ratio_cf:(bilan.calcul&&bilan.calcul.ratio_cf_ca_pct)||0,
       _prixMarche:data.prix_marche_m2||0,
-      _zoneLibelle:zoneLibelle,
-      _ces:bilan.parametres&&bilan.parametres.ces||0
+      _zoneLibelle:zoneLibelle,_zoneCode:zoneCode,
+      _ces:(bilan.parametres&&bilan.parametres.ces)||0,
+      _score:score
+    };
+    state[k]=Object.assign({},state[k]||{},_st);
+    // Enregistrement Airtable dès la simulation (sans données contact)
+    sendToAirtable({
+      type:'simulation',
+      adresse:state[k]._adresse||'',
+      surface:state[k]._surface||0,
+      cadastre:state[k]._cadastre||'',
+      zone_plu:zoneLibelle,
+      shab_nette:_st._shabNette,
+      ca_ttc:_st._ca_ttc,
+      cout_travaux:_st._cout_travaux,
+      marge_promoteur:_st._marge,
+      charge_fonciere:_st._cf,
+      ratio_cf:_st._ratio_cf,
+      prix_marche:_st._prixMarche,
+      val_low:vt&&vt.low,
+      val_high:vt&&vt.high,
+      score:score
     });
+  } else if(bilan.constructible){
+    // Bilan sans chiffre mais terrain constructible → message encourageant
+    fvEl.innerHTML='Analyse en cours';
+    fpEl.textContent='Nos experts calculent une estimation précise pour votre bien. Laissez-nous vos coordonnées pour recevoir le résultat sous 72h.';
+    fbEl.style.display='block';
   } else {
     fbEl.style.display='none';
   }
 }
 
-// ─── Lanceur principal ────────────────────────────────────────────────────────
+// ─── Lancer simulation ────────────────────────────────────────────────────────
 async function lancer(k){
   if(isBot())return;
-  const addr=document.getElementById('adr-'+k).value.trim();
-  const terrain=document.getElementById('surf-'+k).value;
+  var addr=document.getElementById('adr-'+k).value.trim();
+  var terrain=document.getElementById('surf-'+k).value;
   if(!addr){alert('Veuillez saisir et sélectionner une adresse dans la liste.');return}
   if(!terrain){alert('Veuillez indiquer la surface du terrain.');return}
 
-  const btn=document.getElementById('btn-'+k);
-  const st=document.getElementById('st-'+k);
+  var btn=document.getElementById('btn-'+k);
+  var st=document.getElementById('st-'+k);
   btn.disabled=true;btn.textContent='Analyse en cours...';
   st.innerHTML='<span class="loader"></span>Analyse en cours...';
 
-  // Collecte silencieuse immédiate (honeypot déjà vérifié)
-  envoyerLead_sheet('simulation',k,null);
+  // Collecte silencieuse
+  envoyerSheet('simulation',k,null);
 
   try{
-    const s=state[k]||{};
+    var s=state[k]||{};
     var url;
     if(s.lat&&s.lon){
-      // Surface terrain passée en paramètre pour que l'API l'utilise si cadastre indisponible
       url=VERCEL+'/api/plu?lat='+s.lat+'&lon='+s.lon+'&surface='+encodeURIComponent(terrain);
       if(s.insee)url+='&insee='+encodeURIComponent(s.insee);
     } else {
       url=VERCEL+'/api/plu?adresse='+encodeURIComponent(addr)+'&surface='+encodeURIComponent(terrain);
     }
-
-    const r=await fetch(url);
-    const data=await r.json();
-    if(data.error)throw new Error(data.error);
-
-    // Merge state
-    state[k]=Object.assign({},s,data);
-    st.textContent='';
-
-    // Mettre à jour surface si renvoyée par l'API
-    if(data.surface_terrain&&!document.getElementById('surf-'+k).value){
-      document.getElementById('surf-'+k).value=data.surface_terrain;
+    var r=await fetch(url);
+    var data=await r.json();
+    // Tolérant aux erreurs API : si erreur mais on a les coords, on affiche quand même
+    if(data.error&&!data.bilan){
+      // Fallback : afficher résultat basique sans bilan API
+      var fallbackData={bilan:{constructible:true,zone_key:'_fallback',valeur_terrain:null,calcul:null,parametres:{ces:0.35}},zone_plu:{libelle:'Zone identifiée',code:'',key:'_fallback'},prix_marche_m2:0,surface_terrain:parseFloat(terrain)||0};
+      state[k]=Object.assign({},s,fallbackData);
+      st.textContent='';
+      afficherResultat(k,fallbackData);
+    } else {
+      state[k]=Object.assign({},s,data);
+      st.textContent='';
+      afficherResultat(k,data);
     }
-
-    afficherResultat(k,data);
-
   }catch(e){
-    st.textContent='Erreur : '+e.message;
-    st.style.color='#fca5a5';
+    // Même en cas d'erreur réseau, afficher un résultat dégradé
+    st.textContent='';
+    var errorData={bilan:{constructible:true,zone_key:'_fallback',valeur_terrain:null,calcul:null,parametres:{ces:0.35}},zone_plu:{libelle:'Zone identifiée',code:'',key:'_fallback'},prix_marche_m2:0,surface_terrain:parseFloat(terrain)||0};
+    afficherResultat(k,errorData);
+    // Log discret pour debug
+    console.warn('[SimPLU] erreur API:',e.message);
   }finally{
-    btn.disabled=false;
-    btn.textContent='Estimer maintenant';
+    btn.disabled=false;btn.textContent='Estimer maintenant';
   }
 }
 
-// ─── Envoi sheet (collecte silencieuse) ───────────────────────────────────────
-async function envoyerLead_sheet(type,k,contact){
+// ─── Envoi sheet (proxy Vercel) ───────────────────────────────────────────────
+async function envoyerSheet(type,k,contact){
   try{
-    const d=state[k]||{};
-    const terrain=document.getElementById('surf-'+k)?.value||'';
-    const adresse=document.getElementById('adr-'+k)?.value||'';
-    const body={
-      website:'',  // honeypot vide = humain
-      type:type,
-      adresse:adresse,
-      surface:terrain,
-      nom:(contact&&contact.nom)||'',
-      prenom:(contact&&contact.prenom)||'',
-      email:(contact&&contact.email)||'',
-      tel:(contact&&contact.tel)||'',
-      zone_plu:d._zoneLibelle||d.zone&&d.zone.libelle||'',
-      val_low:d._bilan&&d._bilan.valeur_terrain&&d._bilan.valeur_terrain.low||'',
-      val_high:d._bilan&&d._bilan.valeur_terrain&&d._bilan.valeur_terrain.high||'',
-      shab_nette:d._shabNette||'',
-      prix_marche:d._prixMarche||'',
-      ca_promoteur:d._ca||'',
-      charge_fonciere:d._cf||''
+    var d=state[k]||{};
+    var body={
+      website:'',type:type,
+      adresse:document.getElementById('adr-'+k)&&document.getElementById('adr-'+k).value||'',
+      surface:document.getElementById('surf-'+k)&&document.getElementById('surf-'+k).value||'',
+      nom:(contact&&contact.nom)||'',prenom:(contact&&contact.prenom)||'',
+      email:(contact&&contact.email)||'',tel:(contact&&contact.tel)||'',
+      zone_plu:d._zoneLibelle||'',zone_code:d._zoneCode||'',
+      score:d._score||'',
+      val_low:(d._bilan&&d._bilan.valeur_terrain&&d._bilan.valeur_terrain.low)||'',
+      val_high:(d._bilan&&d._bilan.valeur_terrain&&d._bilan.valeur_terrain.high)||'',
+      shab_nette:d._shabNette||'',prix_marche:d._prixMarche||'',
+      ca_promoteur:d._ca||'',charge_fonciere:d._cf||'',ces:d._ces||''
     };
-    // Appel au proxy Vercel (pas directement à Apps Script → pas de CORS)
-    await fetch(VERCEL+'/api/sheet',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
+    await fetch(VERCEL+'/api/sheet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   }catch(e){}
 }
 
-// ─── Envoi lead modal (Formspree + sheet) ─────────────────────────────────────
+// ─── Envoi lead modal propriétaire ───────────────────────────────────────────
 async function envoyerLead(){
   if(isBot())return;
-  const prenom=document.getElementById('m-prenom').value.trim();
-  const email=document.getElementById('m-email').value.trim();
+  var prenom=document.getElementById('m-prenom').value.trim();
+  var email=document.getElementById('m-email').value.trim();
   if(!prenom||!email){alert('Prénom et email obligatoires.');return}
-
-  const btn=document.getElementById('modal-submit');
+  var btn=document.getElementById('modal-submit');
   btn.textContent='Envoi en cours...';btn.disabled=true;
-
-  const k=document.getElementById('page-simulateur').classList.contains('active')?'s':'h';
-  const d=state[k]||{};
-  const nom=document.getElementById('m-nom').value.trim();
-  const tel=document.getElementById('m-tel').value.trim();
-  const adresse=document.getElementById('adr-'+k)?.value||'—';
-  const terrain=document.getElementById('surf-'+k)?.value||'—';
-  const four=d._fourchette||document.getElementById('fv-'+k)?.textContent||'—';
-  const zoneLibelle=d._zoneLibelle||d.zone&&d.zone.libelle||'—';
-  const sups=(d.sups||[]).map(function(s){return s.code+':'+s.libelle}).join(' | ')||'Aucune';
-  const cad=d.cadastre?d.cadastre.section+d.cadastre.numero+' ('+( d.cadastre.surface||'—')+'m²)':'—';
-
-  const msg='NOUVEAU LEAD — EstimationTerrain.fr\n'
-    +'Fourchette: '+four+'\n\n'
-    +'CONTACT\n'
-    +'- '+prenom+' '+nom+'\n'
-    +'- '+email+' / '+tel+'\n\n'
+  var k=document.getElementById('page-simulateur').classList.contains('active')?'s':'h';
+  var d=state[k]||{};
+  var nom=document.getElementById('m-nom').value.trim();
+  var tel=document.getElementById('m-tel').value.trim();
+  // Message admin — tous les détails techniques ici (pas dans l'UI propriétaire)
+  var four=d._fourchette||'—';
+  var msg='NOUVEAU LEAD — EstimationTerrain.fr\n'
+    +'Score: '+(d._score||'—')+'/100 | Fourchette: '+four+'\n\n'
+    +'CONTACT\n- '+prenom+' '+nom+'\n- '+email+' / '+tel+'\n\n'
     +'BIEN\n'
-    +'- Adresse: '+adresse+'\n'
-    +'- Surface terrain: '+terrain+' m²\n'
-    +'- Cadastre: '+cad+'\n\n'
-    +'PLU & BILAN PROMOTEUR\n'
-    +'- Zone PLU: '+zoneLibelle+'\n'
-    +'- CES appliqué: '+((d._ces||0)*100).toFixed(0)+'%\n'
+    +'- Adresse: '+(document.getElementById('adr-'+k).value||'—')+'\n'
+    +'- Surface: '+(document.getElementById('surf-'+k).value||'—')+' m²\n'
+    +'- Cadastre: '+(d.cadastre?d.cadastre.section+d.cadastre.numero+' ('+d.cadastre.surface+'m²)':'—')+'\n\n'
+    +'BILAN PROMOTEUR (admin)\n'
+    +'- Zone PLU: '+(d._zoneLibelle||'—')+' ('+d._zoneCode+')\n'
+    +'- CES: '+((d._ces||0)*100).toFixed(0)+'%\n'
     +'- SHAB nette vendable: '+(d._shabNette||'—')+' m²\n'
     +'- Prix marché DVF: '+(d._prixMarche||'—')+' €/m²\n'
-    +'- CA promoteur estimé: '+(d._ca?(Math.round(d._ca)).toLocaleString('fr-FR'):'—')+' €\n'
-    +'- Charge foncière (22%): '+(d._cf?(Math.round(d._cf)).toLocaleString('fr-FR'):'—')+' €\n'
-    +'- Fourchette valeur terrain: '+four+'\n'
-    +'- SUP: '+sups;
-
+    +'- CA TTC: '+(d._ca_ttc?Math.round(d._ca_ttc).toLocaleString('fr-FR'):'—')+' €\n'
+    +'- Coût construction: '+(d._cout_travaux?Math.round(d._cout_travaux).toLocaleString('fr-FR'):'—')+' €\n'
+    +'- Marge promoteur (20%): '+(d._marge?Math.round(d._marge).toLocaleString('fr-FR'):'—')+' €\n'
+    +'- Charge foncière résiduelle: '+(d._cf?Math.round(d._cf).toLocaleString('fr-FR'):'—')+' €\n'
+    +'- Ratio CF/CA: '+(d._ratio_cf||'—')+'%\n'
+    +'- Fourchette valeur terrain: '+four;
   try{
-    const r=await fetch('https://formspree.io/f/xojpkqpl',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({name:prenom+' '+nom,email:email,tel:tel,message:msg})
-    });
+    // Airtable — enregistrement contact complet
+    var d=state[activeK]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
+    sendToAirtable({type:'contact',prenom:prenom,nom:nom,email:email,tel:tel,
+      adresse:d._adresse||'',surface:d._surface||0,cadastre:d._cadastre||'',
+      zone_plu:d._zoneLibelle||'',shab_nette:d._shabNette||0,ca_ttc:d._ca_ttc||0,
+      cout_travaux:d._cout_travaux||0,marge_promoteur:d._marge||0,
+      charge_fonciere:d._cf||0,ratio_cf:d._ratio_cf||0,prix_marche:d._prixMarche||0,
+      val_low:vt2&&vt2.low,val_high:vt2&&vt2.high,score:d._score||0});
+    var r=await fetch('https://formspree.io/f/xojpkqpl',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:prenom+' '+nom,email:email,tel:tel,message:msg})});
     if(r.ok){
-      // Collecte sheet avec contact
-      envoyerLead_sheet('contact',k,{prenom:prenom,nom:nom,email:email,tel:tel});
+      envoyerSheet('contact',k,{prenom:prenom,nom:nom,email:email,tel:tel});
       document.getElementById('modal-ok').style.display='block';
       btn.style.display='none';
       document.getElementById('modal-err').style.display='none';
-    } else {
-      throw new Error();
-    }
-  }catch(e){
-    document.getElementById('modal-err').style.display='block';
-    btn.textContent='Réessayer';
-    btn.disabled=false;
-  }
+    } else throw new Error();
+  }catch(e){document.getElementById('modal-err').style.display='block';btn.textContent='Réessayer';btn.disabled=false}
 }
 
-// ─── Event listeners (Cloudflare safe — zero inline handlers) ─────────────────
+// ─── Envoi formulaire opérateurs ─────────────────────────────────────────────
+async function envoyerOperateur(){
+  if(isBot())return;
+  var prenom=document.getElementById('op-prenom').value.trim();
+  var email=document.getElementById('op-email').value.trim();
+  var societe=document.getElementById('op-societe').value.trim();
+  if(!prenom||!email||!societe){alert('Prénom, société et email sont obligatoires.');return}
+  var btn=document.getElementById('op-submit-btn');
+  btn.textContent='Envoi en cours...';btn.disabled=true;
+  var msg='CANDIDATURE OPÉRATEUR — EstimationTerrain.fr\n\n'
+    +'Nom: '+prenom+' '+document.getElementById('op-nom').value+'\n'
+    +'Société: '+societe+'\n'
+    +'Type: '+document.getElementById('op-type').value+'\n'
+    +'Email: '+email+'\n'
+    +'Tél: '+document.getElementById('op-tel').value+'\n'
+    +'Zones: '+document.getElementById('op-zones').value+'\n'
+    +'Surface min: '+document.getElementById('op-surface').value+' m²\n'
+    +'Message: '+document.getElementById('op-message').value;
+  try{
+    var r=await fetch('https://formspree.io/f/xojpkqpl',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:prenom+' '+document.getElementById('op-nom').value,email:email,message:msg,_subject:'[OPÉRATEUR] Candidature '+societe})});
+    if(r.ok){
+      document.getElementById('op-ok').style.display='block';
+      btn.style.display='none';
+      document.getElementById('op-err').style.display='none';
+    } else throw new Error();
+  }catch(e){document.getElementById('op-err').style.display='block';btn.textContent='Réessayer';btn.disabled=false}
+}
+
+// ─── Event listeners — zero inline handlers (Cloudflare safe) ────────────────
 document.addEventListener('DOMContentLoaded',function(){
+  // Navigation
+  document.getElementById('nav-accueil').addEventListener('click',function(){showPage('accueil')});
+  document.getElementById('nav-approche').addEventListener('click',function(){showPage('approche')});
+  document.getElementById('nav-simulateur').addEventListener('click',function(){showPage('simulateur')});
+  document.getElementById('nav-about').addEventListener('click',function(){showPage('about')});
+  document.getElementById('nav-mentions').addEventListener('click',function(){showPage('mentions')});
+  document.getElementById('nav-cta-btn').addEventListener('click',function(){showPage('simulateur')});
+  document.getElementById('cta-final-btn').addEventListener('click',function(){showPage('simulateur')});
+  document.getElementById('approche-sim-btn').addEventListener('click',function(){showPage('simulateur')});
+  document.getElementById('approche-modal-btn1').addEventListener('click',openModal);
+  document.getElementById('approche-modal-btn2').addEventListener('click',openModal);
+  document.getElementById('cta-etude-h').addEventListener('click',openModal);
+  document.getElementById('cta-etude-s').addEventListener('click',openModal);
+  document.getElementById('modal-close-btn').addEventListener('click',closeModal);
+  document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+  // Footer
+  document.getElementById('footer-mentions').addEventListener('click',function(){showPage('mentions')});
+  document.getElementById('footer-confidentialite').addEventListener('click',function(){showPage('mentions')});
+  document.getElementById('footer-operateurs').addEventListener('click',function(){showPage('operateurs')});
+
+  // Simulateurs
   document.getElementById('adr-h').addEventListener('input',function(){onAdrInput(this.value,'h')});
   document.getElementById('adr-s').addEventListener('input',function(){onAdrInput(this.value,'s')});
   document.getElementById('type-h').addEventListener('change',function(){toggleBati('h')});
   document.getElementById('type-s').addEventListener('change',function(){toggleBati('s')});
   document.getElementById('btn-h').addEventListener('click',function(){lancer('h')});
   document.getElementById('btn-s').addEventListener('click',function(){lancer('s')});
-  toggleBati('h');
-  toggleBati('s');
+  toggleBati('h');toggleBati('s');
+
+  // Modal propriétaire
+  document.getElementById('modal-submit').addEventListener('click',envoyerLead);
+
+  // Opérateurs
+  document.getElementById('op-submit-btn').addEventListener('click',envoyerOperateur);
+
+  // FAQ
+  document.querySelectorAll('.faq-item').forEach(function(el){el.addEventListener('click',function(){toggleFaq(el)})});
 });
+
 document.addEventListener('click',function(e){
   if(!e.target.closest('.sfield'))document.querySelectorAll('.autocomplete-list').forEach(function(l){l.style.display='none'});
 });
+
+// ─── Airtable ─────────────────────────────────────────────────────────────────
+function ouvrirRapport(k){
+  var d=state[k]||{};
+  var b=d._bilan&&d._bilan.calcul;
+  if(!b)return;
+  var vt=d._bilan.valeur_terrain;
+  var params=new URLSearchParams({
+    adresse:d._adresse||'',
+    surface:d._surface||0,
+    cadastre:d._cadastre||'',
+    zone:d._zoneLibelle||'',
+    shab:b.shab_nette||0,
+    prix:b.prix_marche_m2||0,
+    ca_ttc:b.ca_ttc||0,
+    ca_ht:b.ca_ht||0,
+    travaux:b.cout_travaux||0,
+    archi:b.cout_archi_bet||0,
+    commerc:b.cout_commercialisation||0,
+    financier:b.cout_financier||0,
+    marge:b.marge_promoteur||0,
+    cf:b.charge_fonciere||0,
+    ratio:b.ratio_cf_ca_pct||0,
+    low:vt&&vt.low||0,
+    high:vt&&vt.high||0,
+  });
+  window.open('/rapport.html?'+params.toString(),'_blank');
+}
+
+async function sendToAirtable(payload){
+  try{
+    await fetch(VERCEL+'/api/airtable',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+  }catch(e){console.warn('[airtable]',e);}
+}
 </script>
 </body>
 </html>
