@@ -278,8 +278,12 @@ async function getSurface(lat, lon) {
     surface: props.contenance ? Math.round(props.contenance) : null,
     section: props.section,
     numero: props.numero,
-    commune: props.nom_com || props.commune,
-    code_commune: props.code_com || props.codecomm
+    commune: props.nom_com || props.commune || props.nomcom,
+    // Apicarto retourne dep_abs (ex:"04") + com_abs (ex:"152")
+    // ou code_dep + code_com selon la version
+    code_commune: props.code_dep && props.com_abs
+      ? (props.code_dep + props.com_abs).padStart(5, '0')
+      : props.code_com || props.codecomm || props.code_commune || null
   };
 }
 
@@ -307,7 +311,7 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
-  let { lat, lon, surface, adresse } = req.query;
+  let { lat, lon, surface, adresse, insee } = req.query;
 
   // Géocodage si coords manquantes
   if ((!lat || !lon) && adresse) {
@@ -329,7 +333,8 @@ module.exports = async function handler(req, res) {
       getSurface(latF, lonF)
     ]);
     // DVF après cadastre pour avoir le code commune
-    const codeCommune = cadastreResult && cadastreResult.code_commune;
+    // Priorité: 1) insee BAN (passé par le frontend), 2) code cadastre, 3) null
+    const codeCommune = insee || (cadastreResult && cadastreResult.code_commune) || null;
     const dvfResult = await getPrixMarche(latF, lonF, codeCommune);
 
     // ── Surface terrain ──
