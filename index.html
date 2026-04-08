@@ -1048,9 +1048,8 @@ async function envoyerLead(){
   try{
     // Airtable — enregistrement contact complet
     var d=state[k]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
-    // PATCH la ligne simulation existante avec les coordonnées contact
-    var _rid=_airtableId[k]||null;
-    sendToAirtable({type:'contact',_recordId:_rid,prenom:prenom,nom:nom,email:email,tel:tel,
+    // POST complet avec coordonnées contact + toutes les données bilan
+    sendToAirtable({type:'contact',prenom:prenom,nom:nom,email:email,tel:tel,
       adresse:d._adresse||document.getElementById('adr-'+k).value||'',
       surface:d._surface||parseFloat(document.getElementById('surf-'+k).value)||0,
       cadastre:d._cadastre||(state[k]&&state[k].cadastre?(state[k].cadastre.section||'')+(state[k].cadastre.numero||'')+' ('+(state[k].cadastre.surface||'')+'m²)':''),
