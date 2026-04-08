@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — EstimationTerrain.fr</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--nuit:#0F172A;--nuit2:#1E293B;--nuit3:#334155;--vert:#10B981;--gris:#94A3B8;--rouge:#EF4444}
+body{font-family:'Inter',sans-serif;background:#F1F5F9;color:var(--nuit);min-height:100vh}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--nuit)}
+.login-box{background:var(--nuit2);border-radius:12px;padding:40px;width:340px;text-align:center}
+.login-box h1{font-family:'Syne',sans-serif;color:#fff;margin-bottom:8px;font-size:1.4rem}
+.login-box p{color:var(--gris);font-size:13px;margin-bottom:24px}
+.login-box input{width:100%;padding:10px 14px;background:var(--nuit3);border:1px solid #475569;border-radius:8px;color:#fff;font-size:14px;margin-bottom:12px;outline:none;font-family:'Inter',sans-serif}
+.login-box button{width:100%;padding:11px;background:var(--vert);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px}
+.login-err{color:var(--rouge);font-size:12px;margin-top:8px}
+
+/* APP */
+#app{display:none}
+nav{background:var(--nuit);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+nav .logo{font-family:'Syne',sans-serif;color:#fff;font-size:.95rem;font-weight:800}.logo span{color:var(--vert)}
+nav .nav-right{display:flex;align-items:center;gap:16px}
+nav button{background:none;border:none;color:var(--gris);font-size:13px;cursor:pointer;padding:4px 8px;border-radius:4px}
+nav button:hover{color:#fff}
+.badge-live{background:var(--vert);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600}
+
+.main{max-width:1100px;margin:0 auto;padding:24px}
+.page-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:4px}
+.page-sub{color:var(--gris);font-size:13px;margin-bottom:24px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:10px;padding:16px 20px;border:1px solid #E2E8F0}
+.stat-num{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--nuit)}
+.stat-label{font-size:12px;color:var(--gris);margin-top:2px}
+.stat-card.green .stat-num{color:var(--vert)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid #E2E8F0;padding-bottom:0}
+.tab{padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--gris);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.active{color:var(--vert);border-bottom-color:var(--vert)}
+
+/* TABLE */
+.table-wrap{background:#fff;border-radius:10px;border:1px solid #E2E8F0;overflow:hidden}
+.table-header{padding:14px 20px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between}
+.table-header h3{font-size:14px;font-weight:600}
+.refresh-btn{background:var(--nuit);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--gris);background:#F8FAFC;border-bottom:1px solid #E2E8F0}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid #F1F5F9;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F8FAFC}
+.badge-type{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.badge-contact{background:#DCFCE7;color:#16A34A}
+.badge-sim{background:#EFF6FF;color:#2563EB}
+.fourchette{font-weight:700;color:var(--vert)}
+.empty{text-align:center;padding:40px;color:var(--gris);font-size:13px}
+
+/* MODAL RAPPORT */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:28px;width:560px;max-height:90vh;overflow-y:auto}
+.modal h2{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:4px}
+.modal .modal-sub{font-size:12px;color:var(--gris);margin-bottom:20px}
+.mfield{margin-bottom:14px}
+.mfield label{display:block;font-size:12px;font-weight:500;margin-bottom:4px;color:#475569}
+.mfield input,.mfield textarea,.mfield select{width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;font-family:'Inter',sans-serif;outline:none}
+.mfield textarea{height:80px;resize:vertical}
+.modal-actions{display:flex;gap:8px;margin-top:20px}
+.btn-primary{background:var(--vert);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-secondary{background:#F1F5F9;color:var(--nuit);border:none;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-rapport{background:var(--nuit);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.loading{text-align:center;padding:20px;color:var(--gris)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Estimation<span style="color:#10B981">Terrain</span>.fr</h1>
+    <p>Interface administrateur</p>
+    <input type="password" id="pwd-input" placeholder="Mot de passe" />
+    <button onclick="login()">Connexion</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav>
+    <div class="logo">Estimation<span>Terrain</span>.fr <span class="badge-live">ADMIN</span></div>
+    <div class="nav-right">
+      <span id="last-refresh" style="font-size:12px;color:var(--gris)"></span>
+      <button onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page-title">Dashboard leads</div>
+    <div class="page-sub" id="last-update">Chargement...</div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Simulations totales</div></div>
+      <div class="stat-card green"><div class="stat-num" id="stat-contacts">—</div><div class="stat-label">Leads avec contact</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-today">—</div><div class="stat-label">Aujourd'hui</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-semaine">—</div><div class="stat-label">Cette semaine</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('contacts')">Leads avec contact</button>
+      <button class="tab" onclick="switchTab('sims')">Toutes les simulations</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3 id="table-title">Leads avec contact</h3>
+        <button class="refresh-btn" onclick="loadLeads()">↻ Actualiser</button>
+      </div>
+      <div id="table-container"><div class="loading">Chargement...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RAPPORT -->
+<div class="modal-bg" id="modal-rapport">
+  <div class="modal">
+    <h2>Générer & envoyer le rapport</h2>
+    <div class="modal-sub" id="modal-lead-info">—</div>
+    <div class="mfield"><label>Prénom du propriétaire</label><input type="text" id="r-prenom"/></div>
+    <div class="mfield"><label>Email destinataire</label><input type="email" id="r-email"/></div>
+    <div class="mfield"><label>Note personnalisée (optionnel)</label><textarea id="r-note" placeholder="Ex: Suite à notre échange téléphonique, voici l'étude détaillée..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-rapport" onclick="ouvrirRapport()">📄 Voir le rapport</button>
+      <button class="btn-secondary" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const PWD = 'ET2024admin'; // Changer ce mot de passe !
+const AIRTABLE_TOKEN = 'patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9';
+const AIRTABLE_BASE  = 'applqQPw8cx2pQ8NA';
+const AIRTABLE_TABLE = 'Leads';
+
+function login(){
+  const v = document.getElementById('pwd-input').value;
+  if(v === PWD){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadLeads();
+  } else {
+    document.getElementById('login-err').textContent='Mot de passe incorrect';
+  }
+}
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+function logout(){ location.reload(); }
+
+// ── Données ───────────────────────────────────────────────────────────────────
+let allRecords = [];
+let currentTab = 'contacts';
+let currentRecord = null;
+
+async function loadLeads(){
+  document.getElementById('table-container').innerHTML='<div class="loading">Chargement depuis Airtable...</div>';
+  try {
+    // Récupérer tous les records, triés par date desc
+    let url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(AIRTABLE_TABLE)}?sort[0][field]=Date&sort[0][direction]=desc&pageSize=100`;
+    let records = [];
+    while(url){
+      const r = await fetch(url, { headers:{ 'Authorization': `Bearer ${AIRTABLE_TOKEN}` } });
+      const d = await r.json();
+      if(d.records) records = [...records, ...d.records];
+      url = d.offset ? `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(AIRTABLE_TABLE)}?sort[0][field]=Date&sort[0][direction]=desc&pageSize=100&offset=${d.offset}` : null;
+    }
+    allRecords = records;
+    updateStats();
+    renderTable();
+    document.getElementById('last-update').textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR')}`;
+  } catch(e){
+    document.getElementById('table-container').innerHTML=`<div class="empty">Erreur Airtable : ${e.message}</div>`;
+  }
+}
+
+function updateStats(){
+  const today = new Date().toISOString().split('T')[0];
+  const weekAgo = new Date(Date.now() - 7*24*3600*1000).toISOString().split('T')[0];
+  const contacts = allRecords.filter(r => r.fields.Email);
+  const todayR = allRecords.filter(r => (r.fields.Date||'').startsWith(today));
+  const weekR  = allRecords.filter(r => (r.fields.Date||'') >= weekAgo);
+  document.getElementById('stat-total').textContent    = allRecords.length;
+  document.getElementById('stat-contacts').textContent = contacts.length;
+  document.getElementById('stat-today').textContent    = todayR.length;
+  document.getElementById('stat-semaine').textContent  = weekR.length;
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('table-title').textContent = tab==='contacts' ? 'Leads avec contact' : 'Toutes les simulations';
+  renderTable();
+}
+
+function fmt(n){ return n ? Math.round(n).toLocaleString('fr-FR') : '—'; }
+
+function renderTable(){
+  const records = currentTab === 'contacts'
+    ? allRecords.filter(r => r.fields.Email)
+    : allRecords;
+
+  if(!records.length){
+    document.getElementById('table-container').innerHTML='<div class="empty">Aucun enregistrement</div>';
+    return;
+  }
+
+  let html = `<table>
+    <thead><tr>
+      <th>Date</th><th>Type</th><th>Contact</th><th>Adresse</th>
+      <th>Fourchette</th><th>Score</th><th>Action</th>
+    </tr></thead><tbody>`;
+
+  for(const rec of records){
+    const f = rec.fields;
+    const date = f.Date ? new Date(f.Date).toLocaleDateString('fr-FR') : '—';
+    const type = f.Type || 'simulation';
+    const badgeClass = f.Email ? 'badge-contact' : 'badge-sim';
+    const badgeLabel = f.Email ? '✓ Contact' : 'Simulation';
+    const contact = f.Email ? `<strong>${f.Prenom||''} ${f.Nom||''}</strong><br><small>${f.Email}</small>${f.Tel?'<br><small>'+f.Tel+'</small>':''}` : '<span style="color:#94A3B8">—</span>';
+    const fourchette = f.Fourchette ? `<span class="fourchette">${f.Fourchette}</span>` : '—';
+    const score = f.Score ? `<span style="font-weight:600">${f.Score}/100</span>` : '—';
+    const hasData = f['Val low'] || f['CA TTC'];
+    const btnRapport = hasData ? `<button onclick="openModal('${rec.id}')" style="background:var(--nuit);color:#fff;border:none;padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer">📄 Rapport</button>` : '';
+
+    html += `<tr>
+      <td>${date}</td>
+      <td><span class="badge-type ${badgeClass}">${badgeLabel}</span></td>
+      <td>${contact}</td>
+      <td style="max-width:200px;font-size:12px">${f.Adresse||'—'}</td>
+      <td>${fourchette}</td>
+      <td>${score}</td>
+      <td>${btnRapport}</td>
+    </tr>`;
+  }
+
+  html += '</tbody></table>';
+  document.getElementById('table-container').innerHTML = html;
+}
+
+// ── Modal rapport ─────────────────────────────────────────────────────────────
+function openModal(recordId){
+  currentRecord = allRecords.find(r => r.id === recordId);
+  if(!currentRecord) return;
+  const f = currentRecord.fields;
+  document.getElementById('modal-lead-info').textContent =
+    `${f.Prenom||''} ${f.Nom||''} — ${f.Adresse||'Adresse non renseignée'} — ${f.Fourchette||'Fourchette non calculée'}`;
+  document.getElementById('r-prenom').value = f.Prenom || '';
+  document.getElementById('r-email').value  = f.Email  || '';
+  document.getElementById('modal-rapport').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modal-rapport').classList.remove('open');
+  currentRecord = null;
+}
+
+function ouvrirRapport(){
+  if(!currentRecord) return;
+  const f = currentRecord.fields;
+  const params = new URLSearchParams({
+    adresse:   f.Adresse   || '',
+    surface:   f.Surface   || 0,
+    cadastre:  f.Cadastre  || '',
+    zone:      f['Zone PLU']|| '',
+    shab:      f['SHAB nette'] || 0,
+    prix:      f['Prix marche DVF'] || 0,
+    ca_ttc:    f['CA TTC']  || 0,
+    ca_ht:     f['CA TTC'] ? Math.round(f['CA TTC']/1.20) : 0,
+    travaux:   f['Cout travaux'] || 0,
+    archi:     f['Cout travaux'] ? Math.round(f['Cout travaux']*0.08) : 0,
+    commerc:   f['CA TTC'] ? Math.round(f['CA TTC']*0.05) : 0,
+    financier: f['CA TTC'] ? Math.round(f['CA TTC']*0.04) : 0,
+    marge:     f['Marge promo'] || 0,
+    cf:        f['Charge fonciere'] || 0,
+    ratio:     f['Ratio CF CA'] || 0,
+    low:       f['Val low'] || 0,
+    high:      f['Val high']|| 0,
+    ref:       'ET-' + currentRecord.id.substring(0,8).toUpperCase(),
+  });
+  window.open('/rapport.html?' + params.toString(), '_blank');
+}
+
+// Fermer modal en cliquant dehors
+document.getElementById('modal-rapport').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+
+// Auto-refresh toutes les 2 minutes
+setInterval(loadLeads, 120000);
+</script>
+</body>
+</html>
