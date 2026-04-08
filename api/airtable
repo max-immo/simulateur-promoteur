@@ -1,12 +1,4 @@
 // api/airtable.js — EstimationTerrain.fr
-// Enregistre chaque simulation + lead dans Airtable
-// Base : applqQPw8cx2pQ8NA
-// Token : patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9
-
-const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN || 'patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9';
-const AIRTABLE_BASE  = process.env.AIRTABLE_BASE  || 'applqQPw8cx2pQ8NA';
-const AIRTABLE_TABLE = process.env.AIRTABLE_TABLE || 'Leads';
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
@@ -14,81 +6,78 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // Parser le body manuellement (Vercel ne le fait pas automatiquement)
+  let body = {};
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const {
-      type,         // 'simulation' ou 'contact'
-      adresse,
-      surface,
-      cadastre,
-      zone_plu,
-      shab_nette,
-      ca_ttc,
-      cout_travaux,
-      marge_promoteur,
-      charge_fonciere,
-      ratio_cf,
-      prix_marche,
-      val_low,
-      val_high,
-      score,
-      prenom,
-      nom,
-      email,
-      tel,
-    } = body;
+    if (typeof req.body === 'string') {
+      body = JSON.parse(req.body);
+    } else if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    } else {
+      // Lire le stream
+      const raw = await new Promise((resolve, reject) => {
+        let data = '';
+        req.on('data', chunk => data += chunk);
+        req.on('end', () => resolve(data));
+        req.on('error', reject);
+      });
+      body = raw ? JSON.parse(raw) : {};
+    }
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid JSON body' });
+  }
 
-    const fourchette = val_low && val_high
-      ? `${Math.round(val_low/1000)}K € – ${Math.round(val_high/1000)}K €`
-      : null;
+  const TOKEN = 'patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9';
+  const BASE  = 'applqQPw8cx2pQ8NA';
+  const TABLE = 'Leads'; // Nom exact de ta table Airtable
 
-    const fields = {
-      'Date':           new Date().toISOString(),
-      'Type':           type || 'simulation',
-      'Adresse':        adresse || '',
-      'Surface (m²)':   surface ? Number(surface) : null,
-      'Cadastre':       cadastre || '',
-      'Zone PLU':       zone_plu || '',
-      'SHAB nette (m²)':shab_nette ? Number(shab_nette) : null,
-      'CA TTC (€)':     ca_ttc ? Number(ca_ttc) : null,
-      'Coût travaux (€)': cout_travaux ? Number(cout_travaux) : null,
-      'Marge promo (€)':  marge_promoteur ? Number(marge_promoteur) : null,
-      'Charge foncière (€)': charge_fonciere ? Number(charge_fonciere) : null,
-      'Ratio CF/CA (%)': ratio_cf ? Number(ratio_cf) : null,
-      'Prix marché DVF (€/m²)': prix_marche ? Number(prix_marche) : null,
-      'Fourchette':     fourchette || '',
-      'Val low (€)':    val_low ? Number(val_low) : null,
-      'Val high (€)':   val_high ? Number(val_high) : null,
-      'Score':          score ? Number(score) : null,
-      'Prénom':         prenom || '',
-      'Nom':            nom || '',
-      'Email':          email || '',
-      'Téléphone':      tel || '',
-    };
+  // Champs — noms simples, cohérents avec la table Airtable
+  const fields = {};
+  if (body.type)            fields['Type']           = String(body.type);
+  if (body.adresse)         fields['Adresse']        = String(body.adresse);
+  if (body.surface)         fields['Surface']        = Number(body.surface);
+  if (body.cadastre)        fields['Cadastre']       = String(body.cadastre);
+  if (body.zone_plu)        fields['Zone PLU']       = String(body.zone_plu);
+  if (body.shab_nette)      fields['SHAB nette']     = Number(body.shab_nette);
+  if (body.ca_ttc)          fields['CA TTC']         = Number(body.ca_ttc);
+  if (body.cout_travaux)    fields['Cout travaux']   = Number(body.cout_travaux);
+  if (body.marge_promoteur) fields['Marge promo']    = Number(body.marge_promoteur);
+  if (body.charge_fonciere) fields['Charge fonciere']= Number(body.charge_fonciere);
+  if (body.ratio_cf)        fields['Ratio CF CA']    = Number(body.ratio_cf);
+  if (body.prix_marche)     fields['Prix marche DVF']= Number(body.prix_marche);
+  if (body.val_low)         fields['Val low']        = Number(body.val_low);
+  if (body.val_high)        fields['Val high']       = Number(body.val_high);
+  if (body.val_low && body.val_high) {
+    fields['Fourchette'] = `${Math.round(body.val_low/1000)}K - ${Math.round(body.val_high/1000)}K EUR`;
+  }
+  if (body.score)           fields['Score']          = Number(body.score);
+  if (body.prenom)          fields['Prenom']         = String(body.prenom);
+  if (body.nom)             fields['Nom']            = String(body.nom);
+  if (body.email)           fields['Email']          = String(body.email);
+  if (body.tel)             fields['Tel']            = String(body.tel);
+  fields['Date'] = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // Supprimer les champs null pour ne pas planter Airtable
-    Object.keys(fields).forEach(k => {
-      if (fields[k] === null || fields[k] === '') delete fields[k];
-    });
-
-    const r = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(AIRTABLE_TABLE)}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ fields }),
-    });
+  try {
+    const r = await fetch(
+      `https://api.airtable.com/v0/${BASE}/${encodeURIComponent(TABLE)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fields }),
+      }
+    );
 
     const data = await r.json();
     if (!r.ok) {
-      console.error('[airtable] Erreur:', data);
+      console.error('[airtable] Error:', JSON.stringify(data));
       return res.status(500).json({ error: 'Airtable error', detail: data });
     }
-
     return res.status(200).json({ ok: true, id: data.id });
   } catch (err) {
-    console.error('[airtable] Exception:', err);
+    console.error('[airtable] Exception:', err.message);
     return res.status(500).json({ error: err.message });
   }
 };
