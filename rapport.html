@@ -2,660 +2,380 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Étude de potentiel foncier — EstimationTerrain.fr</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--nuit:#0F172A;--vert:#10B981;--gris:#64748B;--gris-light:#F1F5F9;--border:#E2E8F0}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--nuit);background:#fff;font-size:11pt;line-height:1.6}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* PRINT BAR */
+.print-bar{position:fixed;top:0;left:0;right:0;background:var(--nuit);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;z-index:1000}
+.print-bar span{color:rgba(255,255,255,.6);font-size:12px}
+.print-btn{background:var(--vert);color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+@media print{.print-bar,.edit-bar{display:none!important}body{padding-top:0!important}.editable{border:none!important;background:transparent!important;padding:0!important}}
+@media screen{body{padding-top:52px}}
 
-  :root {
-    --nuit: #0F172A;
-    --vert: #10B981;
-    --gris: #64748B;
-    --gris-light: #F1F5F9;
-    --border: #E2E8F0;
-  }
+/* EDIT BAR */
+.edit-bar{position:fixed;top:52px;left:0;right:0;background:#FFF7ED;border-bottom:1px solid #FED7AA;padding:8px 24px;display:flex;align-items:center;gap:16px;z-index:999;flex-wrap:wrap}
+.edit-bar label{font-size:11px;font-weight:600;color:#92400E}
+.edit-bar input{padding:4px 8px;border:1px solid #FCD34D;border-radius:4px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;width:140px}
+.edit-bar .save-btn{background:#F59E0B;color:#fff;border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
 
-  body {
-    font-family: 'Inter', sans-serif;
-    color: var(--nuit);
-    background: #fff;
-    font-size: 11pt;
-    line-height: 1.6;
-  }
+/* PAGE */
+.page{width:210mm;min-height:297mm;margin:0 auto;padding:0;page-break-after:always;background:#fff}
 
-  /* ── PAGE ── */
-  .page {
-    width: 210mm;
-    min-height: 297mm;
-    margin: 0 auto;
-    padding: 0;
-    page-break-after: always;
-    position: relative;
-    background: #fff;
-  }
+/* PAGE 1 HEADER */
+.p1-header{background:var(--nuit);padding:32px 40px 24px;position:relative;overflow:hidden}
+.p1-header::after{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:rgba(16,185,129,.08)}
+.logo-r{font-size:13pt;font-weight:800;color:#fff;margin-bottom:20px}
+.logo-r span{color:var(--vert)}
+.header-grid{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end}
+.rapport-titre{font-size:22pt;font-weight:800;color:#fff;line-height:1.1;margin-bottom:6px}
+.rapport-sous{font-size:9.5pt;color:rgba(255,255,255,.55)}
+.badge-val{background:var(--vert);border-radius:10px;padding:14px 20px;text-align:center;min-width:170px}
+.badge-val .bv-label{font-size:8pt;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px}
+.badge-val .bv-num{font-size:17pt;font-weight:800;color:#fff;line-height:1}
 
-  @media print {
-    body { background: #fff; }
-    .page { margin: 0; box-shadow: none; }
-    .no-print { display: none !important; }
-  }
+/* BODY */
+.body{padding:28px 40px 60px}
+.section{margin-bottom:22px}
+.stitle{font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--vert);padding-bottom:6px;border-bottom:2px solid var(--vert);margin-bottom:12px}
 
-  /* ── HEADER PAGE 1 ── */
-  .page1-header {
-    background: var(--nuit);
-    padding: 36px 40px 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .page1-header::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: rgba(16,185,129,.12);
-  }
+/* BIEN */
+.bien-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bien-card{background:var(--gris-light);border-radius:8px;padding:12px 14px}
+.bc-label{font-size:8pt;color:var(--gris);text-transform:uppercase;letter-spacing:.05em;font-weight:500;margin-bottom:3px}
+.bc-val{font-size:11pt;font-weight:700;color:var(--nuit)}
 
-  .logo-rapport {
-    font-family: 'Syne', sans-serif;
-    font-size: 15pt;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 24px;
-  }
-  .logo-rapport span { color: var(--vert); }
+/* MARKETING BLOCK */
+.mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.mkt-card{border-radius:10px;padding:16px 18px}
+.mkt-card.dark{background:var(--nuit);color:#fff}
+.mkt-card.light{background:var(--gris-light)}
+.mkt-card .mc-titre{font-size:8.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;opacity:.6}
+.mkt-card.dark .mc-titre{color:#fff}
+.mkt-card.light .mc-titre{color:var(--nuit)}
+.mkt-card .mc-val{font-size:20pt;font-weight:800;line-height:1;margin-bottom:4px}
+.mkt-card.dark .mc-val{color:var(--vert)}
+.mkt-card.light .mc-val{color:var(--nuit)}
+.mkt-card .mc-sub{font-size:8.5pt;opacity:.55}
+.mkt-card.dark .mc-sub{color:#fff}
+.mkt-card.light .mc-sub{color:var(--nuit)}
 
-  .header-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 24px;
-    align-items: end;
-  }
+/* ARGUMENTAIRE */
+.args{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.arg-item{text-align:center;padding:12px 8px;background:var(--gris-light);border-radius:8px}
+.arg-icon{font-size:18px;margin-bottom:6px}
+.arg-titre{font-size:8.5pt;font-weight:700;color:var(--nuit);margin-bottom:3px}
+.arg-text{font-size:7.5pt;color:var(--gris);line-height:1.4}
 
-  .rapport-titre {
-    font-family: 'Syne', sans-serif;
-    font-size: 20pt;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.1;
-    margin-bottom: 8px;
-  }
-  .rapport-sous-titre {
-    font-size: 10pt;
-    color: rgba(255,255,255,.6);
-    font-weight: 400;
-  }
+/* NOTE PERSO */
+.note-perso{background:#F0FDF4;border-left:3px solid var(--vert);border-radius:0 8px 8px 0;padding:12px 16px;font-size:9.5pt;color:#166534;line-height:1.6;font-style:italic}
 
-  .fourchette-badge {
-    background: var(--vert);
-    border-radius: 10px;
-    padding: 14px 20px;
-    text-align: center;
-    min-width: 160px;
-  }
-  .fourchette-badge .label {
-    font-size: 8pt;
-    color: rgba(255,255,255,.8);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    font-weight: 500;
-    margin-bottom: 4px;
-  }
-  .fourchette-badge .valeur {
-    font-family: 'Syne', sans-serif;
-    font-size: 16pt;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1;
-  }
+/* PAGE 2 */
+.p2-header{background:var(--nuit);padding:16px 40px;display:flex;align-items:center;justify-content:space-between}
+.p2-logo{font-size:11pt;font-weight:800;color:#fff}.p2-logo span{color:var(--vert)}
+.p2-ref{font-size:9pt;color:rgba(255,255,255,.45)}
 
-  /* ── BODY ── */
-  .page-body {
-    padding: 28px 40px 24px;
-  }
+/* MARCHÉ */
+.marche-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.mc{background:var(--gris-light);border-radius:8px;padding:12px;text-align:center}
+.mc-v{font-size:15pt;font-weight:800;color:var(--nuit)}
+.mc-l{font-size:7.5pt;color:var(--gris);margin-top:3px}
 
-  .section {
-    margin-bottom: 24px;
-  }
+/* PROCESS */
+.process{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.proc-step{text-align:center;padding:10px 8px}
+.proc-num{font-size:18pt;font-weight:800;color:var(--vert);line-height:1;margin-bottom:6px}
+.proc-titre{font-size:8pt;font-weight:700;color:var(--nuit);margin-bottom:3px}
+.proc-text{font-size:7.5pt;color:var(--gris);line-height:1.4}
 
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 10pt;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--vert);
-    margin-bottom: 12px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--vert);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+/* CTA */
+.cta{background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);border-radius:12px;padding:20px 24px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.cta-titre{font-size:13pt;font-weight:800;color:#fff;margin-bottom:4px}
+.cta-sub{font-size:9pt;color:rgba(255,255,255,.6);line-height:1.5}
+.cta-contact{text-align:right}
+.cta-contact .cc-label{font-size:8pt;color:rgba(255,255,255,.4);margin-bottom:4px}
+.cta-contact .cc-val{font-size:10pt;font-weight:600;color:var(--vert)}
 
-  /* ── BIEN INFO ── */
-  .bien-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
+/* DISCLAIMER */
+.disclaimer{margin-top:16px;padding:10px 14px;background:#FFF7ED;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;font-size:7.5pt;color:#92400E;line-height:1.5}
 
-  .bien-card {
-    background: var(--gris-light);
-    border-radius: 8px;
-    padding: 12px 14px;
-  }
-  .bien-card .bc-label {
-    font-size: 8pt;
-    color: var(--gris);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-  .bien-card .bc-val {
-    font-size: 12pt;
-    font-weight: 600;
-    color: var(--nuit);
-  }
+/* FOOTER */
+.page-footer{position:absolute;bottom:16px;left:40px;right:40px;display:flex;justify-content:space-between;font-size:7.5pt;color:var(--gris);padding-top:10px;border-top:1px solid var(--border)}
 
-  /* ── BILAN TABLE ── */
-  .bilan-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .bilan-table tr {
-    border-bottom: 1px solid var(--border);
-  }
-  .bilan-table tr:last-child {
-    border-bottom: none;
-  }
-  .bilan-table td {
-    padding: 8px 4px;
-    font-size: 10pt;
-  }
-  .bilan-table .bt-label {
-    color: var(--gris);
-    width: 60%;
-  }
-  .bilan-table .bt-val {
-    text-align: right;
-    font-weight: 600;
-    color: var(--nuit);
-  }
-  .bilan-table .bt-val.green { color: var(--vert); font-size: 12pt; }
-  .bilan-table .bt-sep {
-    background: var(--gris-light);
-    font-weight: 700;
-    font-size: 9pt;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--gris);
-    padding: 6px 4px;
-  }
-  .bilan-table .bt-deduction { color: #EF4444; }
-
-  /* ── FOURCHETTE DETAIL ── */
-  .fourchette-detail {
-    background: linear-gradient(135deg, var(--nuit) 0%, #1E293B 100%);
-    border-radius: 12px;
-    padding: 20px 24px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .fd-item .fd-label {
-    font-size: 8pt;
-    color: rgba(255,255,255,.5);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-  .fd-item .fd-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 18pt;
-    font-weight: 800;
-    color: #fff;
-  }
-  .fd-item .fd-sub {
-    font-size: 9pt;
-    color: rgba(255,255,255,.4);
-    margin-top: 2px;
-  }
-
-  /* ── PAGE 2 HEADER ── */
-  .page2-header {
-    background: var(--nuit);
-    padding: 20px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .page2-header .logo-small {
-    font-family: 'Syne', sans-serif;
-    font-size: 11pt;
-    font-weight: 800;
-    color: #fff;
-  }
-  .page2-header .logo-small span { color: var(--vert); }
-  .page2-header .ref {
-    font-size: 9pt;
-    color: rgba(255,255,255,.5);
-  }
-
-  /* ── MARCHÉ ── */
-  .marche-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .marche-card {
-    background: var(--gris-light);
-    border-radius: 8px;
-    padding: 12px;
-    text-align: center;
-  }
-  .marche-card .mc-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 14pt;
-    font-weight: 800;
-    color: var(--nuit);
-  }
-  .marche-card .mc-label {
-    font-size: 8pt;
-    color: var(--gris);
-    margin-top: 4px;
-  }
-
-  /* ── METHODOLOGIE ── */
-  .methodo-steps {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  .methodo-step {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 10px 12px;
-    background: var(--gris-light);
-    border-radius: 8px;
-  }
-  .step-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 14pt;
-    font-weight: 800;
-    color: var(--vert);
-    line-height: 1;
-    min-width: 24px;
-  }
-  .step-text .st-title {
-    font-size: 9pt;
-    font-weight: 600;
-    margin-bottom: 2px;
-  }
-  .step-text .st-desc {
-    font-size: 8.5pt;
-    color: var(--gris);
-    line-height: 1.4;
-  }
-
-  /* ── CONTACT & CTA ── */
-  .cta-block {
-    background: linear-gradient(135deg, var(--vert) 0%, #059669 100%);
-    border-radius: 12px;
-    padding: 20px 24px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    align-items: center;
-  }
-  .cta-block .cta-titre {
-    font-family: 'Syne', sans-serif;
-    font-size: 13pt;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 4px;
-  }
-  .cta-block .cta-sub {
-    font-size: 9pt;
-    color: rgba(255,255,255,.8);
-    line-height: 1.5;
-  }
-  .cta-block .cta-contact {
-    text-align: right;
-  }
-  .cta-block .cta-contact a {
-    color: #fff;
-    font-weight: 600;
-    font-size: 10pt;
-    text-decoration: none;
-  }
-
-  /* ── DISCLAIMER ── */
-  .disclaimer {
-    margin-top: 20px;
-    padding: 12px 16px;
-    background: #FFF7ED;
-    border-left: 3px solid #F59E0B;
-    border-radius: 0 8px 8px 0;
-    font-size: 8.5pt;
-    color: #92400E;
-    line-height: 1.5;
-  }
-
-  /* ── FOOTER ── */
-  .page-footer {
-    position: absolute;
-    bottom: 20px;
-    left: 40px;
-    right: 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    font-size: 8pt;
-    color: var(--gris);
-  }
-
-  /* ── PRINT BUTTON ── */
-  .print-bar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    background: var(--nuit);
-    padding: 12px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,.3);
-  }
-  .print-bar span { color: rgba(255,255,255,.7); font-size: 13px; }
-  .print-btn {
-    background: var(--vert);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-  }
-  @media print { .print-bar { display: none; } body { padding-top: 0; } }
-  @media screen { body { padding-top: 52px; } }
+/* EDITABLE */
+.editable{border:1px dashed #CBD5E1;border-radius:4px;padding:1px 4px;cursor:text;outline:none;display:inline-block;min-width:20px}
+.editable:focus{border-color:var(--vert);background:#F0FDF4}
 </style>
 </head>
 <body>
 
 <!-- BARRE IMPRESSION -->
-<div class="print-bar no-print">
+<div class="print-bar">
   <span>EstimationTerrain.fr — Rapport confidentiel</span>
-  <button class="print-btn" onclick="window.print()">⬇ Télécharger en PDF</button>
+  <button class="print-btn" onclick="window.print()">⬇ Télécharger PDF</button>
 </div>
 
-<!-- ══════════════ PAGE 1 ══════════════ -->
-<div class="page">
-  <div class="page1-header">
-    <div class="logo-rapport">Estimation<span>Terrain</span>.fr</div>
+<!-- BARRE ÉDITION -->
+<div class="edit-bar">
+  <label>✏️ Champs modifiables :</label>
+  <div><label>Fourchette basse</label><input type="number" id="edit-low" oninput="updateVal('low',this.value)"/></div>
+  <div><label>Fourchette haute</label><input type="number" id="edit-high" oninput="updateVal('high',this.value)"/></div>
+  <div><label>Note personnalisée</label><input type="text" id="edit-note" placeholder="Votre message..." oninput="updateNote(this.value)" style="width:220px"/></div>
+  <button class="save-btn" onclick="window.print()">⬇ PDF</button>
+</div>
+
+<!-- ══ PAGE 1 ══ -->
+<div class="page" style="position:relative">
+  <div class="p1-header">
+    <div class="logo-r">Estimation<span>Terrain</span>.fr</div>
     <div class="header-grid">
       <div>
         <div class="rapport-titre">Étude de potentiel<br>foncier constructible</div>
-        <div class="rapport-sous-titre">Rapport confidentiel · Réservé au propriétaire · <span id="rpt-date">{{DATE}}</span></div>
+        <div class="rapport-sous">Document confidentiel · Propriétaire uniquement · <span id="rpt-date"></span></div>
       </div>
-      <div class="fourchette-badge">
-        <div class="label">Valeur estimée</div>
-        <div class="valeur" id="rpt-fourchette">{{FOURCHETTE}}</div>
+      <div class="badge-val">
+        <div class="bv-label">Valorisation estimée</div>
+        <div class="bv-num" id="rpt-fourchette">—</div>
       </div>
     </div>
   </div>
 
-  <div class="page-body">
+  <div class="body">
 
     <!-- BIEN -->
     <div class="section">
-      <div class="section-title">📍 Identification du bien</div>
+      <div class="stitle">📍 Votre bien</div>
       <div class="bien-grid">
-        <div class="bien-card">
+        <div class="bien-card" style="grid-column:span 2">
           <div class="bc-label">Adresse</div>
-          <div class="bc-val" style="font-size:10pt" id="rpt-adresse">{{ADRESSE}}</div>
+          <div class="bc-val" id="rpt-adresse">—</div>
         </div>
         <div class="bien-card">
           <div class="bc-label">Surface terrain</div>
-          <div class="bc-val" id="rpt-surface">{{SURFACE}} m²</div>
+          <div class="bc-val" id="rpt-surface">—</div>
         </div>
         <div class="bien-card">
           <div class="bc-label">Référence cadastrale</div>
-          <div class="bc-val" id="rpt-cadastre">{{CADASTRE}}</div>
+          <div class="bc-val" id="rpt-cadastre">—</div>
         </div>
         <div class="bien-card">
           <div class="bc-label">Zone PLU</div>
-          <div class="bc-val" id="rpt-zone">{{ZONE}}</div>
+          <div class="bc-val" id="rpt-zone">—</div>
         </div>
         <div class="bien-card">
-          <div class="bc-label">SHAB constructible</div>
-          <div class="bc-val" id="rpt-shab">{{SHAB}} m²</div>
-        </div>
-        <div class="bien-card">
-          <div class="bc-label">Prix marché neuf</div>
-          <div class="bc-val" id="rpt-prix">{{PRIX}} €/m²</div>
+          <div class="bc-label">Surface constructible</div>
+          <div class="bc-val" id="rpt-shab">—</div>
         </div>
       </div>
     </div>
 
-    <!-- BILAN PROMOTEUR -->
+    <!-- VALORISATION -->
     <div class="section">
-      <div class="section-title">📊 Bilan promoteur détaillé</div>
-      <table class="bilan-table">
-        <tr><td class="bt-sep" colspan="2">CHIFFRE D'AFFAIRES</td></tr>
-        <tr>
-          <td class="bt-label">CA TTC ({{SHAB}} m² × {{PRIX}} €/m²)</td>
-          <td class="bt-val" id="rpt-ca-ttc">{{CA_TTC}} €</td>
-        </tr>
-        <tr>
-          <td class="bt-label">CA HT (÷ 1,20 TVA 20%)</td>
-          <td class="bt-val" id="rpt-ca-ht">{{CA_HT}} €</td>
-        </tr>
-        <tr><td class="bt-sep" colspan="2">CHARGES PROMOTEUR</td></tr>
-        <tr>
-          <td class="bt-label">Coût de construction (1 650 €/m² SHAB)</td>
-          <td class="bt-val bt-deduction" id="rpt-travaux">− {{TRAVAUX}} €</td>
-        </tr>
-        <tr>
-          <td class="bt-label">Architecte & BET (8% travaux)</td>
-          <td class="bt-val bt-deduction" id="rpt-archi">− {{ARCHI}} €</td>
-        </tr>
-        <tr>
-          <td class="bt-label">Commercialisation (5% CA TTC)</td>
-          <td class="bt-val bt-deduction" id="rpt-commerc">− {{COMMERC}} €</td>
-        </tr>
-        <tr>
-          <td class="bt-label">Frais financiers (4% CA TTC)</td>
-          <td class="bt-val bt-deduction" id="rpt-financier">− {{FINANCIER}} €</td>
-        </tr>
-        <tr>
-          <td class="bt-label">Marge promoteur minimum (20% CA TTC)</td>
-          <td class="bt-val bt-deduction" id="rpt-marge">− {{MARGE}} €</td>
-        </tr>
-        <tr><td class="bt-sep" colspan="2">CHARGE FONCIÈRE RÉSIDUELLE</td></tr>
-        <tr>
-          <td class="bt-label" style="font-weight:600;color:var(--nuit)">Ce que le promoteur peut payer pour votre terrain <span style="font-size:8pt;color:var(--gris)">(ratio {{RATIO}}% du CA)</span></td>
-          <td class="bt-val green" id="rpt-cf">{{CF}} €</td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- FOURCHETTE -->
-    <div class="section">
-      <div class="section-title">💰 Valorisation nette vendeur estimée</div>
-      <div class="fourchette-detail">
-        <div class="fd-item">
-          <div class="fd-label">Hypothèse conservatrice</div>
-          <div class="fd-val" id="rpt-low">{{LOW}}</div>
-          <div class="fd-sub">Scenario de base, marché standard</div>
+      <div class="stitle">💰 Valorisation estimée</div>
+      <div class="mkt-grid">
+        <div class="mkt-card dark">
+          <div class="mc-titre">Hypothèse de base</div>
+          <div class="mc-val" id="rpt-low-card">—</div>
+          <div class="mc-sub">Vente directe, sans mise en concurrence</div>
         </div>
-        <div class="fd-item">
-          <div class="fd-label">Hypothèse optimiste</div>
-          <div class="fd-val" id="rpt-high">{{HIGH}}</div>
-          <div class="fd-sub">Avec mise en concurrence des opérateurs</div>
+        <div class="mkt-card dark">
+          <div class="mc-titre">Avec mise en concurrence</div>
+          <div class="mc-val" id="rpt-high-card">—</div>
+          <div class="mc-sub">Plusieurs opérateurs qualifiés en compétition</div>
         </div>
       </div>
+      <div class="mkt-card light" style="margin-bottom:0;padding:12px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="mc-titre" style="margin-bottom:2px">Prix marché local (neuf)</div>
+            <div style="font-size:9pt;color:var(--gris)" id="rpt-prix-context">—</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:8pt;color:var(--gris)">Surface habitable estimée</div>
+            <div style="font-size:13pt;font-weight:800;color:var(--nuit)" id="rpt-shab2">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POURQUOI NOUS -->
+    <div class="section">
+      <div class="stitle">🎯 Pourquoi nous confier votre dossier</div>
+      <div class="args">
+        <div class="arg-item">
+          <div class="arg-icon">⚖️</div>
+          <div class="arg-titre">100% indépendant</div>
+          <div class="arg-text">Aucun promoteur ne nous rémunère. Nous défendons uniquement vos intérêts.</div>
+        </div>
+        <div class="arg-item">
+          <div class="arg-icon">🔍</div>
+          <div class="arg-titre">Sélection rigoureuse</div>
+          <div class="arg-text">Nous vérifions la solidité financière et les références de chaque opérateur.</div>
+        </div>
+        <div class="arg-item">
+          <div class="arg-icon">🏆</div>
+          <div class="arg-titre">Vous restez libre</div>
+          <div class="arg-text">Vous choisissez l'offre qui vous convient. Aucune obligation de signer.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTE PERSO -->
+    <div class="section">
+      <div class="stitle">✉️ Notre message</div>
+      <div class="note-perso" id="rpt-note">Suite à l'analyse de votre dossier, nous sommes en mesure de vous proposer une mise en relation avec plusieurs opérateurs fonciers qualifiés. Votre terrain présente un potentiel réel qui mérite d'être valorisé à sa juste valeur.</div>
     </div>
 
   </div>
 
   <div class="page-footer">
-    <span>EstimationTerrain.fr — Document confidentiel</span>
-    <span id="rpt-ref">Réf. {{REF}}</span>
-    <span>Page 1/2</span>
+    <span>EstimationTerrain.fr — Confidentiel</span>
+    <span id="rpt-ref1">—</span>
+    <span>Page 1 / 2</span>
   </div>
 </div>
 
 
-<!-- ══════════════ PAGE 2 ══════════════ -->
-<div class="page">
-  <div class="page2-header">
-    <div class="logo-small">Estimation<span>Terrain</span>.fr</div>
-    <div class="ref">Étude confidentielle · <span id="rpt-ref2">Réf. {{REF}}</span></div>
+<!-- ══ PAGE 2 ══ -->
+<div class="page" style="position:relative">
+  <div class="p2-header">
+    <div class="p2-logo">Estimation<span>Terrain</span>.fr</div>
+    <div class="p2-ref" id="rpt-ref2">—</div>
   </div>
 
-  <div class="page-body">
+  <div class="body">
 
-    <!-- CONTEXTE MARCHÉ -->
+    <!-- MARCHÉ -->
     <div class="section">
-      <div class="section-title">📈 Contexte du marché local</div>
+      <div class="stitle">📈 Le marché local en chiffres</div>
       <div class="marche-grid">
-        <div class="marche-card">
-          <div class="mc-val" id="rpt-dvf">{{PRIX}} €/m²</div>
-          <div class="mc-label">Prix moyen DVF</div>
+        <div class="mc">
+          <div class="mc-v" id="rpt-dvf">—</div>
+          <div class="mc-l">Prix moyen DVF (transactions réelles)</div>
         </div>
-        <div class="marche-card">
-          <div class="mc-val" id="rpt-prix-neuf">{{PRIX_NEUF}} €/m²</div>
-          <div class="mc-label">Prix neuf estimé (+15%)</div>
+        <div class="mc">
+          <div class="mc-v" id="rpt-dvf-neuf">—</div>
+          <div class="mc-l">Prix de sortie neuf estimé (+15%)</div>
         </div>
-        <div class="marche-card">
-          <div class="mc-val" id="rpt-ca-m2">{{CA_M2}} €/m²</div>
-          <div class="mc-label">CA/m² constructible</div>
-        </div>
-        <div class="marche-card">
-          <div class="mc-val" id="rpt-cf-m2">{{CF_M2}} €/m²</div>
-          <div class="mc-label">CF/m² de terrain</div>
+        <div class="mc">
+          <div class="mc-v" id="rpt-cf-m2">—</div>
+          <div class="mc-l">Charge foncière au m² de terrain</div>
         </div>
       </div>
-      <p style="font-size:9pt;color:var(--gris);line-height:1.6">
-        Les données de prix sont issues des <strong>Demandes de Valeurs Foncières (DVF)</strong> — base officielle de la DGFiP, mise à jour semestriellement. Le prix neuf intègre une prime de <strong>+15%</strong> reflétant la qualité RE2020, les garanties constructeur et le standing du programme.
+      <p style="font-size:8.5pt;color:var(--gris);line-height:1.6">
+        Prix issus de la base <strong>DVF (Demandes de Valeurs Foncières)</strong> — source officielle de la Direction Générale des Finances Publiques, mise à jour semestriellement. Le prix neuf intègre une prime RE2020 de +15%.
       </p>
     </div>
 
-    <!-- NOTRE APPROCHE -->
+    <!-- NOTRE PROCESS -->
     <div class="section">
-      <div class="section-title">🎯 Notre approche pour maximiser votre prix</div>
-      <div class="methodo-steps">
-        <div class="methodo-step">
-          <div class="step-num">01</div>
-          <div class="step-text">
-            <div class="st-title">Analyse PLU & cadastre</div>
-            <div class="st-desc">Vérification des droits à construire, CES, hauteurs, règles d'implantation via les données officielles IGN/GPU.</div>
-          </div>
+      <div class="stitle">🚀 Comment ça se passe</div>
+      <div class="process">
+        <div class="proc-step">
+          <div class="proc-num">01</div>
+          <div class="proc-titre">Analyse du dossier</div>
+          <div class="proc-text">Vérification PLU, cadastre, contraintes et potentiel réel de votre parcelle.</div>
         </div>
-        <div class="methodo-step">
-          <div class="step-num">02</div>
-          <div class="step-text">
-            <div class="st-title">Bilan promoteur réel</div>
-            <div class="st-desc">Calcul de la charge foncière résiduelle selon les coûts réels du marché — la même méthode que les promoteurs.</div>
-          </div>
+        <div class="proc-step">
+          <div class="proc-num">02</div>
+          <div class="proc-titre">Sélection des opérateurs</div>
+          <div class="proc-text">Nous sélectionnons 3 à 5 opérateurs sérieux, solvables, actifs dans votre secteur.</div>
         </div>
-        <div class="methodo-step">
-          <div class="step-num">03</div>
-          <div class="step-text">
-            <div class="st-title">Sélection des opérateurs</div>
-            <div class="st-desc">Nous sélectionnons uniquement des opérateurs solvables, avec références vérifiées et capacité financière confirmée.</div>
-          </div>
+        <div class="proc-step">
+          <div class="proc-num">03</div>
+          <div class="proc-titre">Appel d'offres</div>
+          <div class="proc-text">Mise en concurrence confidentielle. Les opérateurs proposent leur meilleur prix.</div>
         </div>
-        <div class="methodo-step">
-          <div class="step-num">04</div>
-          <div class="step-text">
-            <div class="st-title">Appel d'offres confidentiel</div>
-            <div class="st-desc">Mise en concurrence de plusieurs opérateurs qualifiés. Vous restez entièrement libre de votre décision finale.</div>
-          </div>
+        <div class="proc-step">
+          <div class="proc-num">04</div>
+          <div class="proc-titre">Vous décidez</div>
+          <div class="proc-text">Vous comparez les offres et choisissez librement. Aucune obligation.</div>
         </div>
       </div>
     </div>
 
     <!-- CTA -->
     <div class="section">
-      <div class="cta-block">
+      <div class="cta">
         <div>
-          <div class="cta-titre">Transformez cette estimation en offre réelle</div>
-          <div class="cta-sub">Nos experts organisent un appel d'offres confidentiel entre opérateurs qualifiés.<br>Vous restez libre de votre décision. Délai moyen : 3 à 6 semaines.</div>
+          <div class="cta-titre">Prêt à connaître votre meilleure offre ?</div>
+          <div class="cta-sub">Un appel de 15 minutes suffit pour lancer le processus.<br>Délai moyen pour recevoir les premières offres : 3 à 6 semaines.</div>
         </div>
         <div class="cta-contact">
-          <div style="color:rgba(255,255,255,.7);font-size:8.5pt;margin-bottom:6px">Contact</div>
-          <a href="mailto:contact@estimationterrain.fr">contact@estimationterrain.fr</a><br>
-          <div style="color:rgba(255,255,255,.8);font-size:9pt;margin-top:4px">estimationterrain.fr</div>
+          <div class="cc-label">Contact</div>
+          <div class="cc-val">estimationterrain.fr</div>
+          <div style="color:rgba(255,255,255,.5);font-size:8pt;margin-top:4px">contact@estimationterrain.fr</div>
         </div>
       </div>
     </div>
 
     <!-- DISCLAIMER -->
     <div class="disclaimer">
-      <strong>Avertissement :</strong> Cette étude est fournie à titre indicatif sur la base des données disponibles (PLU, DVF, cadastre). Elle ne constitue pas une offre d'achat ni un engagement juridique ou financier. Les valeurs réelles peuvent varier selon l'état exact du terrain, les contraintes spécifiques (géotechnique, SUP, servitudes) et les conditions du marché au moment de la transaction. EstimationTerrain.fr n'est pas lié à aucun opérateur foncier ou promoteur immobilier.
+      <strong>Avertissement :</strong> Cette étude est indicative, établie à partir des données PLU et DVF disponibles. Elle ne constitue pas une offre d'achat ni un engagement. Les valeurs réelles peuvent varier selon l'état exact du terrain, les contraintes spécifiques et les conditions du marché. EstimationTerrain.fr est indépendant de tout promoteur ou opérateur foncier.
     </div>
 
   </div>
 
   <div class="page-footer">
-    <span>EstimationTerrain.fr — Document confidentiel</span>
-    <span>Données DVF DGFiP · PLU IGN/GPU</span>
-    <span>Page 2/2</span>
+    <span>EstimationTerrain.fr — Confidentiel</span>
+    <span>Source : DVF DGFiP · PLU IGN/GPU</span>
+    <span>Page 2 / 2</span>
   </div>
 </div>
 
 <script>
-// Remplissage automatique si paramètres URL (ex: rapport.html?low=500000&high=700000&...)
-function fmt(n){return n?Math.round(n).toLocaleString('fr-FR'):'—'}
-function fmtK(n){return n?Math.round(n/1000)+'K €':'—'}
+function fmtK(n){if(!n||n==0)return '—';var k=Math.round(n/1000);return k.toLocaleString('fr-FR')+'K €'}
+function fmtE(n){if(!n||n==0)return '—';return Math.round(n).toLocaleString('fr-FR')+' €'}
+function fmtM2(n){if(!n||n==0)return '—';return Math.round(n).toLocaleString('fr-FR')+' €/m²'}
 
 const p=new URLSearchParams(window.location.search);
-const vals={
-  DATE:    new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}),
-  ADRESSE: p.get('adresse')||'[Adresse à renseigner]',
-  SURFACE: fmt(p.get('surface'))||'—',
-  CADASTRE:p.get('cadastre')||'—',
-  ZONE:    p.get('zone')||'—',
-  SHAB:    fmt(p.get('shab'))||'—',
-  PRIX:    fmt(p.get('prix'))||'—',
-  PRIX_NEUF: fmt(p.get('prix'))?fmt(Math.round(p.get('prix')*1.15)):'—',
-  CA_TTC:  fmt(p.get('ca_ttc'))||'—',
-  CA_HT:   fmt(p.get('ca_ht'))||'—',
-  TRAVAUX: fmt(p.get('travaux'))||'—',
-  ARCHI:   fmt(p.get('archi'))||'—',
-  COMMERC: fmt(p.get('commerc'))||'—',
-  FINANCIER:fmt(p.get('financier'))||'—',
-  MARGE:   fmt(p.get('marge'))||'—',
-  CF:      fmt(p.get('cf'))||'—',
-  RATIO:   p.get('ratio')||'—',
-  LOW:     fmtK(p.get('low')),
-  HIGH:    fmtK(p.get('high')),
-  FOURCHETTE: fmtK(p.get('low'))+' – '+fmtK(p.get('high')),
-  REF:     p.get('ref')||('ET-'+Date.now().toString(36).toUpperCase()),
-  CA_M2:   p.get('shab')&&p.get('ca_ttc')?fmt(Math.round(p.get('ca_ttc')/p.get('shab'))):'—',
-  CF_M2:   p.get('surface')&&p.get('cf')?fmt(Math.round(p.get('cf')/p.get('surface'))):'—',
-};
+var low=parseFloat(p.get('low'))||0;
+var high=parseFloat(p.get('high'))||0;
+var prix=parseFloat(p.get('prix'))||0;
+var surface=parseFloat(p.get('surface'))||0;
+var shab=parseFloat(p.get('shab'))||0;
+var cf=parseFloat(p.get('cf'))||0;
+var ref='ET-'+(p.get('ref')||Date.now().toString(36).toUpperCase());
 
-// Remplacer tous les placeholders
-document.querySelectorAll('[id^="rpt-"]').forEach(function(el){
-  var html=el.innerHTML;
-  Object.keys(vals).forEach(function(k){
-    html=html.replaceAll('{{'+k+'}}',vals[k]);
-  });
-  el.innerHTML=html;
-});
-document.title='EstimationTerrain.fr — Étude foncière — '+vals.ADRESSE;
+function render(){
+  document.getElementById('rpt-date').textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('rpt-fourchette').textContent=fmtK(low)+' – '+fmtK(high);
+  document.getElementById('rpt-adresse').textContent=p.get('adresse')||'—';
+  document.getElementById('rpt-surface').textContent=surface?surface.toLocaleString('fr-FR')+' m²':'—';
+  document.getElementById('rpt-cadastre').textContent=p.get('cadastre')||'—';
+  document.getElementById('rpt-zone').textContent=p.get('zone')||'—';
+  document.getElementById('rpt-shab').textContent=shab?shab.toLocaleString('fr-FR')+' m²':'—';
+  document.getElementById('rpt-shab2').textContent=shab?shab.toLocaleString('fr-FR')+' m²':'—';
+  document.getElementById('rpt-low-card').textContent=fmtK(low);
+  document.getElementById('rpt-high-card').textContent=fmtK(high);
+  document.getElementById('rpt-prix-context').textContent=prix?'Basé sur '+prix.toLocaleString('fr-FR')+' €/m² (DVF local × 1.15 neuf)':'—';
+  document.getElementById('rpt-dvf').textContent=prix?Math.round(prix/1.15).toLocaleString('fr-FR')+' €/m²':'—';
+  document.getElementById('rpt-dvf-neuf').textContent=fmtM2(prix);
+  document.getElementById('rpt-cf-m2').textContent=surface&&cf?Math.round(cf/surface).toLocaleString('fr-FR')+' €/m²':'—';
+  document.getElementById('rpt-ref1').textContent='Réf. '+ref;
+  document.getElementById('rpt-ref2').textContent='Réf. '+ref;
+  // Pré-remplir les champs d'édition
+  document.getElementById('edit-low').value=Math.round(low/1000);
+  document.getElementById('edit-high').value=Math.round(high/1000);
+}
+
+function updateVal(type,val){
+  var v=parseFloat(val)*1000;
+  if(type==='low'){low=v;document.getElementById('rpt-low-card').textContent=fmtK(v);}
+  else{high=v;document.getElementById('rpt-high-card').textContent=fmtK(v);}
+  document.getElementById('rpt-fourchette').textContent=fmtK(low)+' – '+fmtK(high);
+}
+
+function updateNote(val){
+  document.getElementById('rpt-note').textContent=val||'—';
+}
+
+render();
+document.title='EstimationTerrain.fr — '+(p.get('adresse')||'Rapport foncier');
 </script>
 </body>
 </html>
