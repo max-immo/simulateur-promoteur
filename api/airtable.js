@@ -30,7 +30,6 @@ module.exports = async function handler(req, res) {
   const TOKEN = 'patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9';
   const BASE  = 'applqQPw8cx2pQ8NA';
   const TABLE = 'tblzP5PQSTBj4B8LI';
-  const recordId = body._recordId || null; // Si présent → PATCH (update) sinon POST (create)
 
   // Champs — noms simples, cohérents avec la table Airtable
   const fields = {};
@@ -59,12 +58,8 @@ module.exports = async function handler(req, res) {
   fields['Date'] = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   try {
-    const url = recordId
-      ? `https://api.airtable.com/v0/${BASE}/${TABLE}/${recordId}`
-      : `https://api.airtable.com/v0/${BASE}/${TABLE}`;
-    const method = recordId ? 'PATCH' : 'POST';
-    const r = await fetch(url, {
-      method,
+    const r = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLE}`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${TOKEN}`,
         'Content-Type': 'application/json',
