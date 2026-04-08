@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
   "routes": [
     { "src": "/api/plu",        "dest": "/api/plu.js" },
     { "src": "/api/airtable",   "dest": "/api/airtable.js" },
