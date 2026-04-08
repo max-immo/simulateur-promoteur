@@ -853,6 +853,9 @@ function afficherResultat(k,data){
   var _st={
     _bilan:bilan,
     _fourchette:'',
+    _adresse:state[k]&&(state[k]._adresse||state[k].label)||document.getElementById('adr-'+k).value||'',
+    _surface:parseFloat(document.getElementById('surf-'+k).value)||0,
+    _cadastre:state[k]&&state[k].cadastre?(state[k].cadastre.section||'')+(state[k].cadastre.numero||'')+' ('+(state[k].cadastre.surface||'')+'m²)':'',
     _shabNette:(bilan.calcul&&bilan.calcul.shab_nette)||0,
     _ca_ttc:(bilan.calcul&&bilan.calcul.ca_ttc)||0,
     _cout_travaux:(bilan.calcul&&bilan.calcul.cout_travaux)||0,
@@ -896,9 +899,9 @@ function afficherResultat(k,data){
   // Airtable — enregistrer la simulation dans tous les cas
   sendToAirtable({
     type:'simulation',
-    adresse:state[k]._adresse||state[k].label||document.getElementById('adr-'+k).value||'',
-    surface:parseFloat(document.getElementById('surf-'+k).value)||state[k]._surface||0,
-    cadastre:state[k].cadastre?(state[k].cadastre.section||'')+(state[k].cadastre.numero||'')+' ('+( state[k].cadastre.surface||'')+'m²)':state[k]._cadastre||'',
+    adresse:_st._adresse,
+    surface:_st._surface,
+    cadastre:_st._cadastre,
     zone_plu:zoneLibelle,
     shab_nette:_st._shabNette,
     ca_ttc:_st._ca_ttc,
@@ -1026,7 +1029,9 @@ async function envoyerLead(){
     // Airtable — enregistrement contact complet
     var d=state[k]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
     sendToAirtable({type:'contact',prenom:prenom,nom:nom,email:email,tel:tel,
-      adresse:d._adresse||'',surface:d._surface||0,cadastre:d._cadastre||'',
+      adresse:d._adresse||document.getElementById('adr-'+k).value||'',
+      surface:d._surface||parseFloat(document.getElementById('surf-'+k).value)||0,
+      cadastre:d._cadastre||(state[k]&&state[k].cadastre?(state[k].cadastre.section||'')+(state[k].cadastre.numero||'')+' ('+(state[k].cadastre.surface||'')+'m²)':''),
       zone_plu:d._zoneLibelle||'',shab_nette:d._shabNette||0,ca_ttc:d._ca_ttc||0,
       cout_travaux:d._cout_travaux||0,marge_promoteur:d._marge||0,
       charge_fonciere:d._cf||0,ratio_cf:d._ratio_cf||0,prix_marche:d._prixMarche||0,
