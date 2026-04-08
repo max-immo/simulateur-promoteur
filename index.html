@@ -843,84 +843,71 @@ function afficherResultat(k,data){
     text.textContent='Les premières données suggèrent un intérêt limité dans les conditions actuelles. Cependant, certains scénarios spécifiques (division, bail, OAP...) peuvent créer de la valeur. Nos experts peuvent creuser votre dossier.';
   }
 
-  // Fourchette — chiffres clés seulement, zéro jargon technique
+  // ─── Fourchette ───────────────────────────────────────────────────────────
   var fbEl=document.getElementById('fb-'+k);
   var fvEl=document.getElementById('fv-'+k);
   var fpEl=document.getElementById('fp-'+k);
   var vt=bilan.valeur_terrain;
-  // Si valeur_terrain null mais ca_ttc dispo → calculer CF côté client en fallback
-  if((!vt||vt.low<=0)&&bilan.calcul&&bilan.calcul.ca_ttc>0){
-    var c=bilan.calcul;
-    var cf_fb=Math.max(0,c.ca_ht-(c.cout_travaux||0)-(c.cout_archi_bet||0)-(c.cout_commercialisation||0)-(c.cout_financier||0)-(c.marge_promoteur||0));
-    if(cf_fb>0){
-      vt={low:Math.round(cf_fb*0.85/1000)*1000,high:Math.round(cf_fb*0.85*1.35/1000)*1000};
-      vt.low_m2=bilan.calcul.surface_terrain>0?Math.round(vt.low/bilan.calcul.surface_terrain):0;
-      vt.high_m2=bilan.calcul.surface_terrain>0?Math.round(vt.high/bilan.calcul.surface_terrain):0;
-    }
-  }
-  var fmtLow=vt&&vt.low>0&&fmt(vt.low);
-  var fmtHigh=vt&&vt.high>0&&fmt(vt.high);
 
-  if(fmtLow&&fmtHigh&&vt.low>0){
-    // Affichage fourchette simple — sans détails techniques
+  // Mémoriser dans tous les cas pour l'email admin
+  var _st={
+    _bilan:bilan,
+    _fourchette:'',
+    _shabNette:(bilan.calcul&&bilan.calcul.shab_nette)||0,
+    _ca_ttc:(bilan.calcul&&bilan.calcul.ca_ttc)||0,
+    _cout_travaux:(bilan.calcul&&bilan.calcul.cout_travaux)||0,
+    _marge:(bilan.calcul&&bilan.calcul.marge_promoteur)||0,
+    _cf:(bilan.calcul&&bilan.calcul.charge_fonciere)||0,
+    _ratio_cf:(bilan.calcul&&bilan.calcul.ratio_cf_ca_pct)||0,
+    _prixMarche:data.prix_marche_m2||0,
+    _zoneLibelle:zoneLibelle,_zoneCode:zoneCode,
+    _ces:(bilan.parametres&&bilan.parametres.ces)||0,
+    _score:score
+  };
+
+  if(bilan.constructible&&vt&&vt.low>0){
+    var fmtLow=fmt(vt.low);
+    var fmtHigh=fmt(vt.high);
     fvEl.innerHTML=fmtLow+' <em>–</em> '+fmtHigh;
-    // Message vendeur selon niveau
     if(score>=80){
-      fpEl.textContent='C\'est ce qu\'un opérateur pourrait vous proposer pour votre terrain, selon notre estimation. Obtenez une étude précise et faites jouer la concurrence.';
+      fpEl.textContent='Potentiel exceptionnel. Faites jouer la concurrence pour maximiser votre prix.';
     } else if(score>=65){
-      fpEl.textContent='Fourchette estimée selon les données du PLU et les prix de marché locaux. Une étude personnalisée permettra d\'affiner et de maximiser votre prix de vente.';
+      fpEl.textContent='Potentiel élevé. Une mise en concurrence peut considérablement augmenter votre prix.';
     } else {
-      fpEl.textContent='Estimation indicative. Nos experts analyseront en détail les possibilités spécifiques à votre parcelle.';
+      fpEl.textContent='Estimation indicative selon les données PLU et DVF locaux.';
     }
     fbEl.style.display='block';
+    _st._fourchette=fmtLow+' – '+fmtHigh;
     var btnRapport=document.getElementById('btn-rapport-'+k);
     if(btnRapport)btnRapport.style.display='block';
-    // Mémoriser pour l'email admin (les détails restent côté serveur)
-    var _st={
-      _bilan:bilan,_fourchette:fmtLow+' – '+fmtHigh,
-      _shabNette:(bilan.calcul&&bilan.calcul.shab_nette)||0,
-      _ca_ttc:(bilan.calcul&&bilan.calcul.ca_ttc)||0,
-      _cout_travaux:(bilan.calcul&&bilan.calcul.cout_travaux)||0,
-      _marge:(bilan.calcul&&bilan.calcul.marge_promoteur)||0,
-      _cf:(bilan.calcul&&bilan.calcul.charge_fonciere)||0,
-      _ratio_cf:(bilan.calcul&&bilan.calcul.ratio_cf_ca_pct)||0,
-      _prixMarche:data.prix_marche_m2||0,
-      _zoneLibelle:zoneLibelle,_zoneCode:zoneCode,
-      _ces:(bilan.parametres&&bilan.parametres.ces)||0,
-      _score:score
-    };
-    state[k]=Object.assign({},state[k]||{},_st);
-    // Enregistrement Airtable dès la simulation (sans données contact)
-    sendToAirtable({
-      type:'simulation',
-      adresse:state[k]._adresse||'',
-      surface:state[k]._surface||0,
-      cadastre:state[k]._cadastre||'',
-      zone_plu:zoneLibelle,
-      shab_nette:_st._shabNette,
-      ca_ttc:_st._ca_ttc,
-      cout_travaux:_st._cout_travaux,
-      marge_promoteur:_st._marge,
-      charge_fonciere:_st._cf,
-      ratio_cf:_st._ratio_cf,
-      prix_marche:_st._prixMarche,
-      val_low:vt&&vt.low,
-      val_high:vt&&vt.high,
-      score:score
-    });
   } else if(bilan.constructible){
-    // Bilan sans chiffre mais terrain constructible → message encourageant
-    fvEl.innerHTML='Estimation disponible sur demande';
-    fpEl.textContent='Les données de votre parcelle nécessitent une analyse approfondie. Laissez-nous vos coordonnées pour recevoir votre estimation personnalisée sous 72h.';
+    fvEl.innerHTML='Terrain constructible';
+    fpEl.textContent='Laissez-nous vos coordonnées pour recevoir votre estimation sous 72h.';
     fbEl.style.display='block';
-    // Airtable même sans fourchette
-    sendToAirtable({type:'simulation_sans_fourchette',
-      adresse:state[k]&&state[k]._adresse||'',
-      surface:state[k]&&state[k]._surface||0,
-      zone_plu:zoneLibelle,score:score});
   } else {
     fbEl.style.display='none';
   }
+
+  state[k]=Object.assign({},state[k]||{},_st);
+
+  // Airtable — enregistrer la simulation dans tous les cas
+  sendToAirtable({
+    type:'simulation',
+    adresse:state[k]._adresse||'',
+    surface:state[k]._surface||0,
+    cadastre:state[k]._cadastre||'',
+    zone_plu:zoneLibelle,
+    shab_nette:_st._shabNette,
+    ca_ttc:_st._ca_ttc,
+    cout_travaux:_st._cout_travaux,
+    marge_promoteur:_st._marge,
+    charge_fonciere:_st._cf,
+    ratio_cf:_st._ratio_cf,
+    prix_marche:_st._prixMarche,
+    val_low:vt&&vt.low||0,
+    val_high:vt&&vt.high||0,
+    score:score
+  });
 }
 
 // ─── Lancer simulation ────────────────────────────────────────────────────────
