@@ -1,13 +1,12 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/api/plu",        "dest": "/api/plu.js" },
-    { "src": "/api/airtable",   "dest": "/api/airtable.js" },
-    { "src": "/api/sheet",      "dest": "/api/sheet.js" },
-    { "src": "/admin",          "dest": "/admin.html" },
-    { "src": "/admin.html",     "dest": "/admin.html" },
-    { "src": "/rapport",        "dest": "/rapport.html" },
-    { "src": "/rapport.html",   "dest": "/rapport.html" },
-    { "src": "/(.*)",           "dest": "/index.html" }
+    { "src": "/api/plu",      "dest": "/api/plu.js" },
+    { "src": "/api/airtable", "dest": "/api/airtable.js" },
+    { "src": "/api/sheet",    "dest": "/api/sheet.js" },
+    { "src": "/api/rapport",  "dest": "/api/rapport.js" },
+    { "src": "/admin",        "dest": "/admin.html" },
+    { "src": "/rapport",      "dest": "/api/rapport.js" },
+    { "src": "/(.*)",         "dest": "/index.html" }
   ]
 }
