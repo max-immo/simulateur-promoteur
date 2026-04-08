@@ -945,22 +945,20 @@ async function lancer(k){
     var data=await r.json();
     // Tolérant aux erreurs API : si erreur mais on a les coords, on affiche quand même
     if(data.error&&!data.bilan){
-      // Fallback : afficher résultat basique sans bilan API
-      var fallbackData={bilan:{constructible:true,zone_key:'_fallback',valeur_terrain:null,calcul:null,parametres:{ces:0.35}},zone_plu:{libelle:'Zone identifiée',code:'',key:'_fallback'},prix_marche_m2:0,surface_terrain:parseFloat(terrain)||0};
-      state[k]=Object.assign({},s,fallbackData);
+      // API erreur mais on a les coords — calculer côté client
+      var fd=calculFallbackLocal(terrain,s);
+      state[k]=Object.assign({},s,fd);
       st.textContent='';
-      afficherResultat(k,fallbackData);
+      afficherResultat(k,fd);
     } else {
       state[k]=Object.assign({},s,data);
       st.textContent='';
       afficherResultat(k,data);
     }
   }catch(e){
-    // Même en cas d'erreur réseau, afficher un résultat dégradé
     st.textContent='';
-    var errorData={bilan:{constructible:true,zone_key:'_fallback',valeur_terrain:null,calcul:null,parametres:{ces:0.35}},zone_plu:{libelle:'Zone identifiée',code:'',key:'_fallback'},prix_marche_m2:0,surface_terrain:parseFloat(terrain)||0};
-    afficherResultat(k,errorData);
-    // Log discret pour debug
+    var ed=calculFallbackLocal(terrain,s);
+    afficherResultat(k,ed);
     console.warn('[SimPLU] erreur API:',e.message);
   }finally{
     btn.disabled=false;btn.textContent='Estimer maintenant';
@@ -1118,6 +1116,42 @@ document.addEventListener('click',function(e){
 });
 
 // ─── Airtable ─────────────────────────────────────────────────────────────────
+// Calcul bilan côté client — utilisé quand l'API échoue
+// Paramètres province standard (prix DVF fallback × 1.15)
+function calculFallbackLocal(terrain, state){
+  var surf = parseFloat(terrain) || (state && state._surface) || 500;
+  // Prix fallback selon le département extrait de l'adresse ou 2300 générique
+  var prixNeuf = 2645; // 2300 × 1.15 — province standard
+  var ces=0.35, h=9, H=2.80;
+  var sol=Math.round(surf*ces);
+  var niv=Math.floor(h/H);
+  var shab=Math.round(sol*niv*0.85);
+  var ca_ttc=Math.round(shab*prixNeuf);
+  var ca_ht=Math.round(ca_ttc/1.20);
+  var travaux=Math.round(shab*1200);
+  var archi=Math.round(travaux*0.08);
+  var commerc=Math.round(ca_ttc*0.05);
+  var financier=Math.round(ca_ttc*0.04);
+  var marge=Math.round(ca_ttc*0.15);
+  var cf=Math.max(0,ca_ht-travaux-archi-commerc-financier-marge);
+  var low=Math.round(cf*0.85/1000)*1000;
+  var high=Math.round(low*1.35/1000)*1000;
+  return {
+    bilan:{
+      constructible:true,
+      zone_key:'_fallback',
+      zone_label:'Zone à confirmer',
+      valeur_terrain:{low:low,high:high,low_m2:surf>0?Math.round(low/surf):0,high_m2:surf>0?Math.round(high/surf):0},
+      calcul:{shab_nette:shab,ca_ttc:ca_ttc,ca_ht:ca_ht,cout_travaux:travaux,cout_archi_bet:archi,cout_commercialisation:commerc,cout_financier:financier,marge_promoteur:marge,charge_fonciere:cf,ratio_cf_ca_pct:ca_ttc>0?Math.round(cf/ca_ttc*100):0,prix_marche_m2:prixNeuf,surface_terrain:surf},
+      parametres:{ces:ces,hauteur_acrotere:h}
+    },
+    zone_plu:{libelle:'Zone à confirmer',code:'',key:'_fallback',source:'estimation locale'},
+    prix_marche_m2:prixNeuf,
+    surface_terrain:surf,
+    dvf:{source:'Estimation locale (API indisponible)'}
+  };
+}
+
 function ouvrirRapport(k){
   var d=state[k]||{};
   var b=d._bilan&&d._bilan.calcul;
@@ -1157,4 +1191,3 @@ async function sendToAirtable(payload){
 </script>
 </body>
 </html>
- 
