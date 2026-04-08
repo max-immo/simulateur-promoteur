@@ -743,7 +743,7 @@ async function pickAdr(idx,k){
   var f=list._features[idx];var p=f.properties;
   var lon=f.geometry.coordinates[0];var lat=f.geometry.coordinates[1];
   document.getElementById('adr-'+k).value=p.label;hideAC(k);
-  state[k]={lat:lat,lon:lon,insee:p.citycode,label:p.label};
+  state[k]={lat:lat,lon:lon,insee:p.citycode,label:p.label,_adresse:p.label,_surface:parseFloat(document.getElementById('surf-'+k).value)||0};
   initMap(k,lat,lon);loadCadastre(k,lat,lon);
 }
 
@@ -896,9 +896,9 @@ function afficherResultat(k,data){
   // Airtable — enregistrer la simulation dans tous les cas
   sendToAirtable({
     type:'simulation',
-    adresse:state[k]._adresse||'',
-    surface:state[k]._surface||0,
-    cadastre:state[k]._cadastre||'',
+    adresse:state[k]._adresse||state[k].label||document.getElementById('adr-'+k).value||'',
+    surface:parseFloat(document.getElementById('surf-'+k).value)||state[k]._surface||0,
+    cadastre:state[k].cadastre?(state[k].cadastre.section||'')+(state[k].cadastre.numero||'')+' ('+( state[k].cadastre.surface||'')+'m²)':state[k]._cadastre||'',
     zone_plu:zoneLibelle,
     shab_nette:_st._shabNette,
     ca_ttc:_st._ca_ttc,
@@ -1025,7 +1025,7 @@ async function envoyerLead(){
   try{
     // Airtable — enregistrement contact complet
     var d=state[k]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
-    sendToAirtable({type:'contact',prenom:prenom,nom:nom,email:email,tel:tel,
+    sendToAirtable({type:'contact',_recordId:_airtableRecordId,prenom:prenom,nom:nom,email:email,tel:tel,
       adresse:d._adresse||'',surface:d._surface||0,cadastre:d._cadastre||'',
       zone_plu:d._zoneLibelle||'',shab_nette:d._shabNette||0,ca_ttc:d._ca_ttc||0,
       cout_travaux:d._cout_travaux||0,marge_promoteur:d._marge||0,
@@ -1179,13 +1179,16 @@ function ouvrirRapport(k){
   window.open('/rapport.html?'+params.toString(),'_blank');
 }
 
+var _airtableRecordId=null; // ID de la ligne simulation pour la mettre à jour au contact
 async function sendToAirtable(payload){
   try{
-    await fetch(VERCEL+'/api/airtable',{
+    var resp=await fetch(VERCEL+'/api/airtable',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload)
     });
+    var rdata=await resp.json();
+    if(rdata&&rdata.id&&payload.type==='simulation')_airtableRecordId=rdata.id;
   }catch(e){console.warn('[airtable]',e);}
 }
 </script>
