@@ -205,32 +205,31 @@ async function getZonePLU(lat, lon) {
 // Utilise l'API DVF officielle d'etalab (geoportail-urbanisme / data.gouv)
 // Fallback département si DVF+ insuffisant
 async function getPrixMarche(lat, lon, codeCommune) {
-  // ── Source 1 : API Pappers Immobilier (prix m² officiel par commune) ───────
-  // Pappers agrège les DVF DGFiP par commune — même source que Meilleurs Agents
-  // Token public visible dans toutes les pages Pappers Immobilier
+  // ── Source officielle : data.gouv.fr — fichiers DVF DGFiP ─────────────────
+  // API data.economie.gouv.fr (Ministère Économie/Finances — même source que DVF etalab)
+  // Filtre direct par code commune INSEE, logements uniquement
   if (codeCommune) {
-    const url = `https://api-immobilier.pappers.fr/v1/commune/${codeCommune}`;
-    const data = await fetchJson(url, {
-      headers: { "Authorization": "Bearer 423daecc878d51b79f0df6bce6c20341eb5db2fcb39f1d2a" }
-    });
-    if (data && data.prix_m2 && data.prix_m2 > 800) {
-      // prix_m2 = prix médian toutes transactions (maisons + appartements)
-      // +15% pour prix neuf RE2020
-      const prixNeuf = Math.round(data.prix_m2 * 1.15);
-      return {
-        prix: prixNeuf,
-        prix_ancien: data.prix_m2,
-        coeff_neuf: 1.15,
-        nb_transactions: data.nombre_transactions_5_ans || null,
-        source: `Pappers (DVF DGFiP commune ${codeCommune}) × 1.15 neuf`,
-        type: "logements"
-      };
+    // Endpoint ODS data.economie.gouv.fr — DVF open data officiel
+    const url = `https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/dvf-open-data/records`
+      + `?where=code_commune%3D%22${codeCommune}%22`
+      + `%20AND%20nature_mutation%3D%22Vente%22`
+      + `%20AND%20(type_local%3D%22Appartement%22%20OR%20type_local%3D%22Maison%22)`
+      + `%20AND%20surface_reelle_bati%20%3E%2030`
+      + `&select=valeur_fonciere%2Csurface_reelle_bati%2Ctype_local%2Cdate_mutation`
+      + `&order_by=date_mutation%20DESC`
+      + `&limit=100`;
+    const data = await fetchJson(url);
+    if (data && data.results && data.results.length >= 3) {
+      const result = filtrerEtCalculer(data.results, `DVF data.economie.gouv.fr commune ${codeCommune}`);
+      if (result) return result;
     }
   }
 
-  // ── Source 2 : API DVF+ Cerema (fallback) ────────────────────────────────
+  // ── Fallback : DVF+ Cerema (DGALN) ────────────────────────────────────────
+  // https://www.data.gouv.fr/dataservices/api-donnees-foncieres — accès libre
   if (codeCommune) {
-    const url = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/?code_insee=${codeCommune}&ordering=-date_mutation&limit=200`;
+    const url = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/`
+      + `?code_insee=${codeCommune}&ordering=-date_mutation&limit=200`;
     const data = await fetchJson(url);
     if (data && (data.results || data.features)) {
       const items = data.results || data.features || [];
@@ -385,17 +384,35 @@ module.exports = async function handler(req, res) {
     const zoneInfo = ZONES_PLU[zoneKey] || ZONES_PLU["_fallback"];
 
     // ── Prix marché ──
-    const dep = cadastreResult && cadastreResult.code_commune
-      ? cadastreResult.code_commune.substring(0, 2)
-      : "00";
+    // Extraire le département depuis toutes les sources disponibles
+    const dep = (codeCommune && codeCommune.length >= 2)
+      ? codeCommune.substring(0, 2)
+      : (insee && insee.length >= 2)
+        ? insee.substring(0, 2)
+        : (cadastreResult && cadastreResult.code_commune)
+          ? cadastreResult.code_commune.substring(0, 2)
+          : null;
 
     let prixMarche, dvfDetail;
     if (dvfResult && dvfResult.prix > 0) {
       prixMarche = dvfResult.prix;
       dvfDetail = dvfResult;
     } else {
+      // Fallback département — toujours retourner un prix cohérent
       prixMarche = getPrixFallback(dep);
-      dvfDetail = { prix: prixMarche, source: `Fallback département ${dep}`, nb_transactions: 0, rayon_m: null };
+      dvfDetail = {
+        prix: prixMarche,
+        source: dep ? `Fallback département ${dep}` : "Fallback national",
+        nb_transactions: 0,
+        rayon_m: null
+      };
+    }
+    
+    // Garde-fou : prix minimum absolu 1500 €/m² (hors zones rurales profondes)
+    if (prixMarche < 1500 && dep && !['15','19','23','48','09','12','43'].includes(dep)) {
+      prixMarche = 1500;
+      dvfDetail.prix = prixMarche;
+      dvfDetail.source += ' (plancher 1500)';
     }
 
     // ── Bilan promoteur ──
