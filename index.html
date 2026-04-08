@@ -856,6 +856,9 @@ function afficherResultat(k,data){
     _shabNette:(bilan.calcul&&bilan.calcul.shab_nette)||0,
     _ca_ttc:(bilan.calcul&&bilan.calcul.ca_ttc)||0,
     _cout_travaux:(bilan.calcul&&bilan.calcul.cout_travaux)||0,
+    _cout_archi:(bilan.calcul&&bilan.calcul.cout_archi_bet)||0,
+    _cout_commerc:(bilan.calcul&&bilan.calcul.cout_commercialisation)||0,
+    _cout_financier:(bilan.calcul&&bilan.calcul.cout_financier)||0,
     _marge:(bilan.calcul&&bilan.calcul.marge_promoteur)||0,
     _cf:(bilan.calcul&&bilan.calcul.charge_fonciere)||0,
     _ratio_cf:(bilan.calcul&&bilan.calcul.ratio_cf_ca_pct)||0,
@@ -900,6 +903,9 @@ function afficherResultat(k,data){
     shab_nette:_st._shabNette,
     ca_ttc:_st._ca_ttc,
     cout_travaux:_st._cout_travaux,
+    cout_archi:_st._cout_archi,
+    cout_commerc:_st._cout_commerc,
+    cout_financier:_st._cout_financier,
     marge_promoteur:_st._marge,
     charge_fonciere:_st._cf,
     ratio_cf:_st._ratio_cf,
@@ -1010,7 +1016,11 @@ async function envoyerLead(){
     +'- Prix marché DVF: '+(d._prixMarche||'—')+' €/m²\n'
     +'- CA TTC: '+(d._ca_ttc?Math.round(d._ca_ttc).toLocaleString('fr-FR'):'—')+' €\n'
     +'- Coût construction: '+(d._cout_travaux?Math.round(d._cout_travaux).toLocaleString('fr-FR'):'—')+' €\n'
-    +'- Marge promoteur (20%): '+(d._marge?Math.round(d._marge).toLocaleString('fr-FR'):'—')+' €\n'
+    +'- Autres coûts (archi/BET + commerc. + financiers): '+((d._cout_archi&&d._cout_commerc&&d._cout_financier)?Math.round((d._cout_archi+d._cout_commerc+d._cout_financier)).toLocaleString('fr-FR'):'—')+' €\n'
+    +'  · Archi/BET (8% travaux): '+(d._cout_archi?Math.round(d._cout_archi).toLocaleString('fr-FR'):'—')+' €\n'
+    +'  · Commercialisation (5% CA): '+(d._cout_commerc?Math.round(d._cout_commerc).toLocaleString('fr-FR'):'—')+' €\n'
+    +'  · Frais financiers (4% CA): '+(d._cout_financier?Math.round(d._cout_financier).toLocaleString('fr-FR'):'—')+' €\n'
+    +'- Marge promoteur: '+(d._marge?Math.round(d._marge).toLocaleString('fr-FR'):'—')+' €\n'
     +'- Charge foncière résiduelle: '+(d._cf?Math.round(d._cf).toLocaleString('fr-FR'):'—')+' €\n'
     +'- Ratio CF/CA: '+(d._ratio_cf||'—')+'%\n'
     +'- Fourchette valeur terrain: '+four;
