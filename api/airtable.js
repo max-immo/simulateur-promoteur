@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
 
   const TOKEN = 'patV3Y32egcgcAWtV.387f32b10745f12e2e21ab8ae8fa4df221ff70543da7b1296234bf78d7fdc9c9';
   const BASE  = 'applqQPw8cx2pQ8NA';
-  const TABLE = 'LEAD ESTIM TERRAIN';
+  const TABLE = 'tblzP5PQSTBj4B8LI';
 
   // Champs — noms simples, cohérents avec la table Airtable
   const fields = {};
