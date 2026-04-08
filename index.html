@@ -3,10 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EstimationTerrain.fr — Découvrez le vrai potentiel de votre terrain</title>
+<title>Estimation terrain constructible gratuite — Vendez au meilleur prix | EstimationTerrain.fr</title>
+<meta name="description" content="Estimez gratuitement votre terrain constructible comme le ferait un promoteur. Bilan foncier en 60 secondes, données DVF officielles. Indépendant de tout opérateur.">
+<meta name="keywords" content="estimation terrain constructible, vendre terrain promoteur, bilan promoteur gratuit, valeur terrain foncier, prix terrain constructible">
+<meta property="og:title" content="Estimation terrain constructible gratuite | EstimationTerrain.fr">
+<meta property="og:description" content="Bonne mise en concurrence = +147 000 € dans votre poche. Estimez votre terrain comme un promoteur en 60 secondes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://estimationterrain.fr">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://estimationterrain.fr">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "EstimationTerrain.fr",
+  "description": "Estimation gratuite du potentiel foncier de votre terrain constructible",
+  "url": "https://estimationterrain.fr",
+  "applicationCategory": "FinanceApplication",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -15,8 +34,8 @@
   --vert:#10B981;--vert-dark:#059669;--vert-light:#D1FAE5;
   --blanc:#F8FAFC;--gris:#94A3B8;--gris-light:#E2E8F0;--texte:#0F172A;
   --or:#F59E0B;
-  --font-body:'Inter',sans-serif;
-  --font-display:'Syne',sans-serif;
+  --font-body:'Plus Jakarta Sans',sans-serif;
+  --font-display:'Plus Jakarta Sans',sans-serif;
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--font-body);background:var(--blanc);color:var(--texte);line-height:1.6;font-weight:400}
@@ -37,7 +56,7 @@ nav{position:sticky;top:0;z-index:200;background:var(--nuit);border-bottom:1px s
 .hero-left{padding:5rem 3rem 5rem 6rem}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--vert);margin-bottom:2rem;letter-spacing:.04em}
 .hero-badge::before{content:'';width:6px;height:6px;background:var(--vert);border-radius:50%;flex-shrink:0}
-.hero h1{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.01em;margin-bottom:1.5rem;font-stretch:normal;font-variation-settings:normal}
+.hero h1{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3rem);font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.02em;margin-bottom:1.5rem}
 .hero h1 em{color:var(--vert);font-style:italic}
 .hero-sub{font-size:1.05rem;color:var(--gris);max-width:440px;margin-bottom:1.5rem;line-height:1.75}
 .hero-independant{display:flex;align-items:flex-start;gap:8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--vert);margin-bottom:2rem;max-width:440px;line-height:1.5}
@@ -290,12 +309,12 @@ footer{padding:2rem 1.5rem;flex-direction:column;text-align:center}}
 <div class="page active" id="page-accueil">
   <div class="hero">
     <div class="hero-left">
-      <div class="hero-badge">⚠️ Ce que le promoteur ne vous dira jamais</div>
-      <h1>Votre terrain vaut<br>peut-être le double.<br><em>Il le sait déjà.</em></h1>
-      <p class="hero-sub">En moyenne, les propriétaires qui acceptent la première offre laissent <strong style="color:#fff">147 000 €</strong> sur la table. Découvrez ce que vaut vraiment votre terrain — en 60 secondes.</p>
-      <div class="hero-independant">Nous ne travaillons pour aucun promoteur. Notre seul intérêt&nbsp;: que vous sachiez la vérité.</div>
+      <div class="hero-badge">Estimation gratuite · Indépendant de tout promoteur</div>
+      <h1>Votre terrain vaut<br>peut-être bien plus<br><em>que ce qu'on vous propose.</em></h1>
+      <p class="hero-sub">Bonne mise en concurrence = <strong style="color:#fff">+147 000 €</strong> dans votre poche en moyenne. Découvrez ce que vaut vraiment votre terrain en 60 secondes — le même calcul que les promoteurs.</p>
+      <div class="hero-independant">100% indépendant · Aucun promoteur ne nous rémunère · Votre intérêt avant tout</div>
       <div class="hero-proof">
-        <div class="proof-item"><div class="proof-num">147K€</div><div class="proof-label">laissés en moyenne sur la table</div></div>
+        <div class="proof-item"><div class="proof-num">+147K€</div><div class="proof-label">gagnés en moyenne avec la concurrence</div></div>
         <div class="proof-item"><div class="proof-num">72h</div><div class="proof-label">pour connaître la vérité</div></div>
         <div class="proof-item"><div class="proof-num">100%</div><div class="proof-label">gratuit & confidentiel</div></div>
       </div>
