@@ -53,7 +53,7 @@ module.exports = async function handler(req, res) {
   if (body.score)           fields['Score']          = Number(body.score);
   if (body.prenom)          fields['Prenom']         = String(body.prenom);
   if (body.nom)             fields['Nom']            = String(body.nom);
-  if (body.email)           fields['Email']          = String(body.email);
+  if (body.email)           fields['E-mail']         = String(body.email);
   if (body.tel)             fields['Tel']            = String(body.tel);
   fields['Date'] = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
