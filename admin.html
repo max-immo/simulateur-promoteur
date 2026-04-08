@@ -292,6 +292,8 @@ function ouvrirRapport(){
     low:       f['Val low'] || 0,
     high:      f['Val high']|| 0,
     ref:       'ET-' + currentRecord.id.substring(0,8).toUpperCase(),
+    email:     f['E-mail'] || '',
+    prenom:    f.prenom || '',
   });
   window.open('/rapport.html?' + params.toString(), '_blank');
 }
