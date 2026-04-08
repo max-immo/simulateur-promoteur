@@ -98,12 +98,23 @@ function calculBilan(surfaceTerrain, zoneKey, prixMarche) {
   }
 
   const H_ETAGE = 2.80;
-  const COUT_CONSTRUCTION_M2 = 1650; // €/m² SHAB (travaux + VRD, standard PACA/IDF)
-  const COEFF_ARCHI_BET     = 0.08;  // 8% du coût travaux
-  const COEFF_COMMERC       = 0.05;  // 5% CA TTC
-  const COEFF_FINANCIER      = 0.04;  // 4% CA TTC
-  const COEFF_MARGE          = 0.20;  // 20% CA TTC marge min promoteur
-  const TVA                  = 1.20;
+  const COEFF_ARCHI_BET  = 0.08;  // 8% travaux — constant
+  const COEFF_COMMERC    = 0.05;  // 5% CA TTC — constant
+  const COEFF_FINANCIER  = 0.04;  // 4% CA TTC — constant
+  const TVA              = 1.20;
+
+  // Coût construction et marge selon le marché local
+  // Proxy : prix de sortie neuf — reflète la tension du marché
+  // IDF / Paris (prix neuf > 4600) : construction 1650€, marge 20%
+  // Grandes métropoles (3200–4600) : construction 1400€, marge 17%
+  // Province standard (< 3200) : construction 1200€, marge 15%
+  const prixNeufEstime = prixMarche; // prixMarche est déjà le prix neuf (DVF × 1.15)
+  const COUT_CONSTRUCTION_M2 = prixNeufEstime > 4600 ? 1650
+    : prixNeufEstime > 3200 ? 1400
+    : 1200;
+  const COEFF_MARGE = prixNeufEstime > 4600 ? 0.20
+    : prixNeufEstime > 3200 ? 0.17
+    : 0.15;
 
   const surface_au_sol = Math.round(surfaceTerrain * zone.ces);
   const nb_niveaux     = Math.floor(zone.hauteur / H_ETAGE);
