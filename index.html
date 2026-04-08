@@ -848,8 +848,18 @@ function afficherResultat(k,data){
   var fvEl=document.getElementById('fv-'+k);
   var fpEl=document.getElementById('fp-'+k);
   var vt=bilan.valeur_terrain;
-  var fmtLow=vt&&fmt(vt.low);
-  var fmtHigh=vt&&fmt(vt.high);
+  // Si valeur_terrain null mais ca_ttc dispo → calculer CF côté client en fallback
+  if((!vt||vt.low<=0)&&bilan.calcul&&bilan.calcul.ca_ttc>0){
+    var c=bilan.calcul;
+    var cf_fb=Math.max(0,c.ca_ht-(c.cout_travaux||0)-(c.cout_archi_bet||0)-(c.cout_commercialisation||0)-(c.cout_financier||0)-(c.marge_promoteur||0));
+    if(cf_fb>0){
+      vt={low:Math.round(cf_fb*0.85/1000)*1000,high:Math.round(cf_fb*0.85*1.35/1000)*1000};
+      vt.low_m2=bilan.calcul.surface_terrain>0?Math.round(vt.low/bilan.calcul.surface_terrain):0;
+      vt.high_m2=bilan.calcul.surface_terrain>0?Math.round(vt.high/bilan.calcul.surface_terrain):0;
+    }
+  }
+  var fmtLow=vt&&vt.low>0&&fmt(vt.low);
+  var fmtHigh=vt&&vt.high>0&&fmt(vt.high);
 
   if(fmtLow&&fmtHigh&&vt.low>0){
     // Affichage fourchette simple — sans détails techniques
@@ -900,9 +910,14 @@ function afficherResultat(k,data){
     });
   } else if(bilan.constructible){
     // Bilan sans chiffre mais terrain constructible → message encourageant
-    fvEl.innerHTML='Analyse en cours';
-    fpEl.textContent='Nos experts calculent une estimation précise pour votre bien. Laissez-nous vos coordonnées pour recevoir le résultat sous 72h.';
+    fvEl.innerHTML='Estimation disponible sur demande';
+    fpEl.textContent='Les données de votre parcelle nécessitent une analyse approfondie. Laissez-nous vos coordonnées pour recevoir votre estimation personnalisée sous 72h.';
     fbEl.style.display='block';
+    // Airtable même sans fourchette
+    sendToAirtable({type:'simulation_sans_fourchette',
+      adresse:state[k]&&state[k]._adresse||'',
+      surface:state[k]&&state[k]._surface||0,
+      zone_plu:zoneLibelle,score:score});
   } else {
     fbEl.style.display='none';
   }
@@ -1014,7 +1029,7 @@ async function envoyerLead(){
     +'- Fourchette valeur terrain: '+four;
   try{
     // Airtable — enregistrement contact complet
-    var d=state[activeK]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
+    var d=state[k]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
     sendToAirtable({type:'contact',prenom:prenom,nom:nom,email:email,tel:tel,
       adresse:d._adresse||'',surface:d._surface||0,cadastre:d._cadastre||'',
       zone_plu:d._zoneLibelle||'',shab_nette:d._shabNette||0,ca_ttc:d._ca_ttc||0,
