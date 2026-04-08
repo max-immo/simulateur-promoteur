@@ -918,6 +918,7 @@ function afficherResultat(k,data){
   // Airtable — enregistrer la simulation dans tous les cas
   sendToAirtable({
     type:'simulation',
+    _k:k,
     adresse:_st._adresse,
     surface:_st._surface,
     cadastre:_st._cadastre,
@@ -1047,7 +1048,9 @@ async function envoyerLead(){
   try{
     // Airtable — enregistrement contact complet
     var d=state[k]||{};var vt2=d._bilan&&d._bilan.valeur_terrain;
-    sendToAirtable({type:'contact',prenom:prenom,nom:nom,email:email,tel:tel,
+    // PATCH la ligne simulation existante avec les coordonnées contact
+    var _rid=_airtableId[k]||null;
+    sendToAirtable({type:'contact',_recordId:_rid,prenom:prenom,nom:nom,email:email,tel:tel,
       adresse:d._adresse||document.getElementById('adr-'+k).value||'',
       surface:d._surface||parseFloat(document.getElementById('surf-'+k).value)||0,
       cadastre:d._cadastre||(state[k]&&state[k].cadastre?(state[k].cadastre.section||'')+(state[k].cadastre.numero||'')+' ('+(state[k].cadastre.surface||'')+'m²)':''),
@@ -1203,15 +1206,17 @@ function ouvrirRapport(k){
   window.open('/rapport.html?'+params.toString(),'_blank');
 }
 
+var _airtableId={}; // stocke l'ID par simulateur (h ou s)
 async function sendToAirtable(payload){
   try{
-    // Toujours POST — une ligne simulation, une ligne contact si coordonnées renseignées
-    delete payload._recordId;
-    await fetch(VERCEL+'/api/airtable',{
+    var k=payload._k||'h'; delete payload._k;
+    var resp=await fetch(VERCEL+'/api/airtable',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload)
     });
+    var data=await resp.json();
+    if(data&&data.id&&payload.type==='simulation') _airtableId[k]=data.id;
   }catch(e){console.warn('[airtable]',e);}
 }
 </script>
