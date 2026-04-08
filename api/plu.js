@@ -216,39 +216,72 @@ async function getZonePLU(lat, lon) {
 // Utilise l'API DVF officielle d'etalab (geoportail-urbanisme / data.gouv)
 // Fallback département si DVF+ insuffisant
 async function getPrixMarche(lat, lon, codeCommune) {
-  // ── Source officielle : data.gouv.fr — fichiers DVF DGFiP ─────────────────
-  // API data.economie.gouv.fr (Ministère Économie/Finances — même source que DVF etalab)
-  // Filtre direct par code commune INSEE, logements uniquement
-  if (codeCommune) {
-    // Endpoint ODS data.economie.gouv.fr — DVF open data officiel
-    const url = `https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/dvf-open-data/records`
-      + `?where=code_commune%3D%22${codeCommune}%22`
-      + `%20AND%20nature_mutation%3D%22Vente%22`
-      + `%20AND%20(type_local%3D%22Appartement%22%20OR%20type_local%3D%22Maison%22)`
-      + `%20AND%20surface_reelle_bati%20%3E%2030`
-      + `&select=valeur_fonciere%2Csurface_reelle_bati%2Ctype_local%2Cdate_mutation`
-      + `&order_by=date_mutation%20DESC`
-      + `&limit=100`;
-    const data = await fetchJson(url);
-    if (data && data.results && data.results.length >= 3) {
-      const result = filtrerEtCalculer(data.results, `DVF data.economie.gouv.fr commune ${codeCommune}`);
-      if (result) return result;
-    }
+  // ── API Christian Quest DVF — rayon progressif ────────────────────────────
+  // Source : api.cquest.org/dvf (données DGFiP/data.gouv.fr)
+  // Filtre type_local directement dans l'URL → pas de pollution par terrains/garages
+  // Rayon progressif : 1km → 2km → 6km (logique métier demandée)
+  
+  const SEUILS = [
+    { dist: 1000, min: 3 },   // 1km → minimum 3 transactions
+    { dist: 2000, min: 5 },   // 2km → minimum 5 transactions
+    { dist: 6000, min: 3 },   // 6km → au moins 3 si zone peu dense
+  ];
+
+  for (const { dist, min } of SEUILS) {
+    // Appartements d'abord (prix plus représentatifs du neuf collectif)
+    const urlAppart = `https://api.cquest.org/dvf?lat=${lat}&lon=${lon}&dist=${dist}&nature_mutation=Vente&type_local=Appartement`;
+    const urlMaison = `https://api.cquest.org/dvf?lat=${lat}&lon=${lon}&dist=${dist}&nature_mutation=Vente&type_local=Maison`;
+
+    const [dataAppart, dataMaison] = await Promise.all([
+      fetchJson(urlAppart),
+      fetchJson(urlMaison)
+    ]);
+
+    const apparts = (dataAppart && dataAppart.resultats) ? dataAppart.resultats : [];
+    const maisons = (dataMaison && dataMaison.resultats) ? dataMaison.resultats : [];
+
+    // Priorité appartements si ≥ 3, sinon mix
+    const items = apparts.length >= 3 ? apparts : [...apparts, ...maisons];
+
+    if (items.length < min) continue;
+
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 5);
+
+    const prixM2 = items
+      .filter(r => {
+        const surf = parseFloat(r.surface_reelle_bati || 0);
+        const val  = parseFloat(r.valeur_fonciere || 0);
+        const date = new Date(r.date_mutation || "2000-01-01");
+        return surf > 30 && val > 20000 && val < 6000000 && date > cutoff;
+      })
+      .map(r => parseFloat(r.valeur_fonciere) / parseFloat(r.surface_reelle_bati))
+      .filter(p => p >= 1000 && p <= 20000);
+
+    if (prixM2.length < min) continue;
+
+    // Moyenne tronquée (retire 10% extrêmes)
+    const sorted = prixM2.slice().sort((a, b) => a - b);
+    const trim   = Math.max(1, Math.floor(sorted.length * 0.10));
+    const trimmed = sorted.slice(trim, sorted.length - trim);
+    const moyenne = Math.round(trimmed.reduce((a, b) => a + b, 0) / trimmed.length);
+
+    // +15% prix neuf (RE2020, garanties, standing)
+    const prixNeuf = Math.round(moyenne * 1.15);
+    const typeLabel = apparts.length >= 3 ? "appartements" : "maisons/mixte";
+
+    return {
+      prix: prixNeuf,
+      prix_ancien: moyenne,
+      coeff_neuf: 1.15,
+      nb_transactions: prixM2.length,
+      rayon_m: dist,
+      source: `DVF ${prixM2.length} ${typeLabel} (rayon ${dist}m) × 1.15 neuf`,
+      type: typeLabel
+    };
   }
 
-  // ── Fallback : DVF+ Cerema (DGALN) ────────────────────────────────────────
-  // https://www.data.gouv.fr/dataservices/api-donnees-foncieres — accès libre
-  if (codeCommune) {
-    const url = `https://apidf-preprod.cerema.fr/dvf_opendata/mutations/`
-      + `?code_insee=${codeCommune}&ordering=-date_mutation&limit=200`;
-    const data = await fetchJson(url);
-    if (data && (data.results || data.features)) {
-      const items = data.results || data.features || [];
-      const result = filtrerEtCalculer(items, `DVF+ Cerema commune ${codeCommune}`);
-      if (result) return result;
-    }
-  }
-
+  // Fallback département uniquement si vraiment aucune donnée DVF dans 6km
   return null;
 }
 
@@ -305,8 +338,9 @@ const PRIX_DEPT = {
 };
 
 function getPrixFallback(dep) {
-  if (!dep) return 2200;
-  return PRIX_DEPT[dep] || PRIX_DEPT[dep.substring(0, 2)] || 2200;
+  if (!dep) return Math.round(2200 * 1.15);
+  const prix = PRIX_DEPT[dep] || PRIX_DEPT[dep.substring(0, 2)] || 2200;
+  return Math.round(prix * 1.15); // +15% prix neuf systématique
 }
 
 // ─── API Cadastre apicarto ────────────────────────────────────────────────────
