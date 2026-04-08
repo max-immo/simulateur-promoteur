@@ -52,7 +52,7 @@ module.exports = async function handler(req, res) {
     fields['Fourchette'] = `${Math.round(body.val_low/1000)}K - ${Math.round(body.val_high/1000)}K EUR`;
   }
   if (body.score)           fields['Score']          = Number(body.score);
-  if (body.prenom)          fields['Prenom']         = String(body.prenom);
+  if (body.prenom)          fields['prenom']         = String(body.prenom);
   if (body.nom)             fields['Nom']            = String(body.nom);
   if (body.email)           fields['E-mail']         = String(body.email);
   if (body.tel)             fields['Tel']            = String(body.tel);
